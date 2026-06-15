@@ -10,6 +10,6 @@
   <rect x="440" y="514" width="810" height="254" rx="22" fill="#fff" opacity="0.065"/>
   <path d="M500 690C590 590 680 650 760 560s180-85 260-12 120 18 168-28" fill="none" stroke="#9ee8ff" stroke-width="8" stroke-linecap="round" opacity="0.72"/>
   <circle cx="1180" cy="172" r="24" fill="#d8f36a" opacity="0.78"/>
-  <text x="188" y="214" fill="#f4f7f8" font-family="Arial" font-size="46" font-weight="700">SaaS OPS</text>
+  <text x="188" y="214" fill="#f4f7f8" font-family="Arial" font-size="46" font-weight="700">XXXX</text>
   <text x="188" y="270" fill="#f4f7f8" opacity="0.55" font-family="Arial" font-size="22">Dashboard / Components / Flow</text>
 </svg>

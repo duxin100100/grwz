@@ -1,5 +1,5 @@
 {
-  "name": "duxin-portfolio",
+  "name": "uuu-portfolio",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,10 +9,16 @@
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/rapier": "^2.2.0",
     "@vitejs/plugin-react": "latest",
+    "meshline": "^3.3.1",
+    "motion": "^12.40.0",
     "ogl": "^1.0.11",
     "react": "latest",
     "react-dom": "latest",
+    "three": "^0.184.0",
     "vite": "latest"
   }
 }

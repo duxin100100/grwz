@@ -190,6 +190,7 @@ class Media {
     image,
     index,
     length,
+    data,
     scene,
     screen,
     text,
@@ -205,6 +206,7 @@ class Media {
     this.image = image;
     this.index = index;
     this.length = length;
+    this.data = data;
     this.scene = scene;
     this.screen = screen;
     this.text = text;
@@ -215,7 +217,6 @@ class Media {
     this.font = font;
     this.createShader();
     this.createMesh();
-    this.createTitle();
     this.onResize();
   }
 
@@ -351,8 +352,8 @@ class Media {
     if (screen) this.screen = screen;
     if (viewport) this.viewport = viewport;
     this.scale = this.screen.height / 1500;
-    this.plane.scale.y = (this.viewport.height * (900 * this.scale)) / this.screen.height;
-    this.plane.scale.x = (this.viewport.width * (700 * this.scale)) / this.screen.width;
+    this.plane.scale.y = (this.viewport.height * (1040 * this.scale)) / this.screen.height;
+    this.plane.scale.x = (this.viewport.width * (815 * this.scale)) / this.screen.width;
     this.plane.program.uniforms.uPlaneSizes.value = [this.plane.scale.x, this.plane.scale.y];
     this.padding = 2;
     this.width = this.plane.scale.x + this.padding;
@@ -372,13 +373,16 @@ class GalleryApp {
       font = 'bold 30px Figtree',
       scrollSpeed = 2,
       scrollEase = 0.05,
-      autoScrollSpeed = 0
+      autoScrollSpeed = 0,
+      onSelect
     } = {}
   ) {
     this.container = container;
     this.scrollSpeed = scrollSpeed;
     this.autoScrollSpeed = autoScrollSpeed;
+    this.onSelect = onSelect;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
+    this.hasDragged = false;
     this.onCheckDebounce = debounce(this.onCheck, 200);
     autoBind(this);
     this.createRenderer();
@@ -434,6 +438,7 @@ class GalleryApp {
         image: data.image,
         index,
         length: this.mediasImages.length,
+        data,
         scene: this.scene,
         screen: this.screen,
         text: data.text,
@@ -458,6 +463,7 @@ class GalleryApp {
 
   onTouchDown(e) {
     this.isDown = true;
+    this.hasDragged = false;
     this.scroll.position = this.scroll.current;
     this.start = e.touches ? e.touches[0].clientX : e.clientX;
   }
@@ -466,6 +472,7 @@ class GalleryApp {
     if (!this.isDown) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     const distance = (this.start - x) * (this.scrollSpeed * 0.025);
+    if (Math.abs(this.start - x) > 6) this.hasDragged = true;
     this.scroll.target = this.scroll.position + distance;
   }
 
@@ -478,6 +485,37 @@ class GalleryApp {
     const delta = e.deltaY || e.wheelDelta || e.detail;
     this.scroll.target += (delta > 0 ? this.scrollSpeed : -this.scrollSpeed) * 0.2;
     this.onCheckDebounce();
+  }
+
+  onClick(e) {
+    if (!this.onSelect || this.hasDragged) return;
+    const media = this.getMediaAt(e.clientX, e.clientY);
+    if (media?.data) this.onSelect(media.data);
+  }
+
+  getMediaAt(clientX, clientY) {
+    if (!this.medias || !this.viewport || !this.screen) return null;
+    const rect = this.container.getBoundingClientRect();
+    const x = ((clientX - rect.left) / this.screen.width) * this.viewport.width - this.viewport.width / 2;
+    const y = -(((clientY - rect.top) / this.screen.height) * this.viewport.height - this.viewport.height / 2);
+    let selected = null;
+    let selectedDistance = Infinity;
+
+    this.medias.forEach((media) => {
+      const plane = media.plane;
+      const halfWidth = plane.scale.x / 2;
+      const halfHeight = plane.scale.y / 2;
+      const dx = x - plane.position.x;
+      const dy = y - plane.position.y;
+      if (Math.abs(dx) > halfWidth || Math.abs(dy) > halfHeight) return;
+      const distance = Math.hypot(dx / halfWidth, dy / halfHeight);
+      if (distance < selectedDistance) {
+        selected = media;
+        selectedDistance = distance;
+      }
+    });
+
+    return selected;
   }
 
   onCheck() {
@@ -522,6 +560,7 @@ class GalleryApp {
 
   addEventListeners() {
     this.container.addEventListener('wheel', this.onWheel, { passive: true });
+    this.container.addEventListener('click', this.onClick);
     this.container.addEventListener('mousedown', this.onTouchDown);
     this.container.addEventListener('touchstart', this.onTouchDown, { passive: true });
     window.addEventListener('resize', this.onResize);
@@ -534,6 +573,7 @@ class GalleryApp {
   destroy() {
     window.cancelAnimationFrame(this.raf);
     this.container.removeEventListener('wheel', this.onWheel);
+    this.container.removeEventListener('click', this.onClick);
     this.container.removeEventListener('mousedown', this.onTouchDown);
     this.container.removeEventListener('touchstart', this.onTouchDown);
     window.removeEventListener('resize', this.onResize);
@@ -556,7 +596,8 @@ export default function CircularGallery({
   fontUrl,
   scrollSpeed = 2,
   scrollEase = 0.05,
-  autoScrollSpeed = 0
+  autoScrollSpeed = 0,
+  onSelect
 }) {
   const containerRef = useRef(null);
 
@@ -574,14 +615,15 @@ export default function CircularGallery({
         font: resolvedFont,
         scrollSpeed,
         scrollEase,
-        autoScrollSpeed
+        autoScrollSpeed,
+        onSelect
       });
     });
     return () => {
       isMounted = false;
       if (app) app.destroy();
     };
-  }, [items, bend, textColor, borderRadius, font, fontUrl, scrollSpeed, scrollEase, autoScrollSpeed]);
+  }, [items, bend, textColor, borderRadius, font, fontUrl, scrollSpeed, scrollEase, autoScrollSpeed, onSelect]);
 
   return <div className="circular-gallery" ref={containerRef} />;
 }

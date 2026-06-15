@@ -1,5 +1,11 @@
+import { useEffect, useState } from 'react';
+
+import BlurReveal from './components/BlurReveal';
+import BlurText from './components/BlurText';
+import BorderGlow from './components/BorderGlow';
 import CircularGallery from './components/CircularGallery';
 import ProfileCard from './components/ProfileCard';
+import SplashCursor from './components/SplashCursor';
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
 
@@ -11,112 +17,112 @@ const navItems = [
 
 const heroWorks = [
   {
-    title: 'SaaS 运营平台',
-    label: 'B端后台 / 设计系统',
+    title: 'XXXX-01',
+    label: '#### / ####',
     image: asset('assets/project-saas.svg')
   },
   {
-    title: '会员视觉升级',
-    label: 'C端会员 / 转化路径',
+    title: 'XXXX-02',
+    label: '#### / ####',
     image: asset('assets/project-comic.svg')
   },
   {
-    title: '营销活动 H5',
-    label: '活动视觉 / 互动体验',
+    title: 'XXXX-03',
+    label: '#### / ####',
     image: asset('assets/project-campaign.svg')
   },
   {
-    title: '组件规范',
-    label: 'Design System / 复用效率',
+    title: 'XXXX-04',
+    label: '#### / ####',
     image: asset('assets/project-system.svg')
   },
   {
-    title: '权益运营',
-    label: '银行场景 / 用户触达',
+    title: 'XXXX-05',
+    label: '#### / ####',
     image: asset('assets/project-benefit.svg')
   },
   {
-    title: 'AI 设计提效',
-    label: 'AIGC / 视觉探索',
+    title: 'XXXX-06',
+    label: '#### / ####',
     image: asset('assets/project-ai.svg')
   }
 ];
 
 const stats = [
-  { value: '8+', label: '设计经验' },
+  { value: '10', label: '设计经验' },
   { value: '30%', label: '效率提升' },
   { value: '80%+', label: '场景复用' }
 ];
 
 const timeline = [
   {
-    time: '2018.03 - 2018.06',
-    company: '小红书',
-    role: 'UI设计实习生',
-    text: '协助产品页面和运营活动视觉设计，参与素材整理、细节优化、切图标注和设计稿交付。'
+    time: '20XX.XX - 20XX.XX',
+    company: 'XXXX-01',
+    role: '####',
+    text: '##########，##########，##########。'
   },
   {
-    time: '2018.07 - 2021.05',
-    company: '上海哔哩哔哩科技有限公司',
-    role: 'UI设计师',
-    text: '负责哔哩哔哩漫画会员产品、超漫俱乐部视觉升级，以及暑期活动、周年庆等大型营销项目设计。'
+    time: '20XX.XX - 20XX.XX',
+    company: 'XXXX-02',
+    role: '####',
+    text: '##########，##########，##########。'
   },
   {
-    time: '2021.06 - 至今',
-    company: '上海海湾汇信息科技有限公司',
-    role: 'UI设计师',
-    text: '负责数字化营销 SaaS 平台 B端后台与 C端产品设计，推动组件化、体验规范与多银行业务场景落地。'
+    time: '20XX.XX - 20XX.XX',
+    company: 'XXXX-03',
+    role: '####',
+    text: '##########，##########，##########。'
   }
 ];
 
 const projects = [
   {
-    title: 'C端设计',
-    subtitle: 'Consumer Design',
+    title: 'XXXX-A',
+    subtitle: '#### ####',
     image: asset('assets/project-comic.svg')
   },
   {
-    title: 'B端设计',
-    subtitle: 'B-end Design',
+    title: 'XXXX-B',
+    subtitle: '#### ####',
     image: asset('assets/project-saas.svg')
   },
   {
-    title: '运营设计',
-    subtitle: 'Operation Design',
+    title: 'XXXX-C',
+    subtitle: '#### ####',
     image: asset('assets/project-campaign.svg')
   },
   {
-    title: '品牌设计',
-    subtitle: 'Brand Design',
+    title: 'XXXX-D',
+    subtitle: '#### ####',
     image: asset('assets/project-system.svg')
   }
 ];
 
 const strengths = [
   {
-    title: '复杂业务流程拆解',
+    title: '########',
     type: 'CORE',
-    tags: ['活动配置链路', '权益运营模型', '订单与数据追踪']
+    tags: ['####', '####', '####']
   },
   {
-    title: '设计系统与组件库',
+    title: '########',
     type: 'SYSTEM',
-    tags: ['组件规范沉淀', '多场景复用', '交付标准统一']
+    tags: ['####', '####', '####']
   },
   {
-    title: 'C端会员转化体验',
+    title: '########',
     type: 'GROWTH',
-    tags: ['权益展示', '付费转化路径', '年轻化视觉']
+    tags: ['####', '####', '####']
   },
   {
-    title: '营销活动视觉落地',
+    title: '########',
     type: 'VISUAL',
-    tags: ['主视觉延展', 'H5互动玩法', '运营物料统一']
+    tags: ['####', '####', '####']
   },
   {
-    title: 'AI辅助设计提效',
+    title: '########',
     type: 'AIGC',
-    tags: ['概念探索', '网页搭建', '设计交付提速']
+    tags: ['####', '####', '####']
   }
 ];
 
@@ -125,8 +131,7 @@ function Header() {
     <header className="site-header">
       <div className="site-header__inner">
         <a className="brand-pill" href="#top" aria-label="返回首页">
-          <span className="brand-mark">DX</span>
-          <span>DuXin</span>
+          <img className="brand-logo" src={asset('assets/logo-black.svg')} alt="" aria-hidden="true" />
         </a>
         <nav aria-label="主导航">
           {navItems.map((item) => (
@@ -143,10 +148,15 @@ function Header() {
   );
 }
 
-function Hero() {
+function Hero({ onOpenMedia }) {
   const galleryItems = heroWorks.map((work) => ({
     image: work.image,
-    text: work.title
+    text: work.title,
+    title: work.title,
+    label: work.label,
+    mediaType: work.mediaType || 'image',
+    mediaSrc: work.mediaSrc || work.image,
+    poster: work.poster || work.image
   }));
 
   return (
@@ -156,11 +166,11 @@ function Hero() {
       <div className="hero-content shell">
         <p className="eyebrow">Portfolio 2026 / UI Designer</p>
         <h1>
-          DUXIN
+          UUU
           <span>PORTFOLIO</span>
         </h1>
         <p className="hero-copy">
-          用系统化设计与 AI 工作流，让复杂业务更清晰、交付更高效、产品更易落地。
+          ##########，##########，##########。
         </p>
       </div>
       <div className="hero-gallery" aria-label="作品画廊">
@@ -172,10 +182,49 @@ function Hero() {
           font="bold 18px Arial"
           scrollSpeed={1.7}
           scrollEase={0.035}
-          autoScrollSpeed={0.012}
+          autoScrollSpeed={-0.012}
+          onSelect={onOpenMedia}
         />
       </div>
     </section>
+  );
+}
+
+function MediaLightbox({ media, onClose }) {
+  useEffect(() => {
+    if (!media) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [media, onClose]);
+
+  if (!media) return null;
+
+  const isVideo = media.mediaType === 'video';
+
+  return (
+    <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={media.title || '作品预览'}>
+      <button className="media-lightbox__backdrop" type="button" aria-label="关闭预览" onClick={onClose} />
+      <div className="media-lightbox__panel">
+        <div className="media-lightbox__stage">
+          {isVideo ? (
+            <video className="media-lightbox__media" src={media.mediaSrc} poster={media.poster} controls playsInline />
+          ) : (
+            <img className="media-lightbox__media" src={media.mediaSrc} alt={media.title || '作品预览'} />
+          )}
+        </div>
+        <button className="media-lightbox__close" type="button" aria-label="关闭预览" onClick={onClose}>
+          <span aria-hidden="true" />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -188,22 +237,21 @@ function Experience() {
     <section className="section experience" id="experience">
       <div className="shell">
         <div className="section-title">
-          <h2>WORK EXPERIENCE <span>↘</span></h2>
-          <p>个人经历</p>
+          <BlurText as="h2" text="WORK EXPERIENCE ↘" delay={42} animateBy="letters" direction="top" />
+          <BlurText as="p" text="个人经历" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="experience-grid">
-          <div className="profile-card-frame">
+          <BlurReveal className="profile-card-frame" delay={0.12} direction="bottom" duration={0.78} distance={36}>
             <ProfileCard
               className="profile-card-static"
-              name="DuXin"
+              name="UUU"
               title="UI Designer"
-              handle="duxin.design"
-              status="8 YEARS / UXUI / SaaS / Growth"
+              handle="uuu.mask"
+              avatarUrl={asset('assets/profile-gray.png')}
+              status="XX YEARS / #### / #### / ####"
               contactText="Contact"
-              avatarUrl={asset('assets/portrait.svg')}
-              miniAvatarUrl={asset('assets/portrait.svg')}
               showUserInfo
-              enableTilt={false}
+              enableTilt
               enableMobileTilt={false}
               onContactClick={handleProfileContact}
               behindGlowEnabled={false}
@@ -211,36 +259,40 @@ function Experience() {
               behindGlowSize="58%"
               innerGradient="linear-gradient(145deg, rgba(12,18,18,0.96) 0%, rgba(42,68,48,0.86) 48%, rgba(184,255,32,0.28) 100%)"
             />
-          </div>
+          </BlurReveal>
           <div className="about-panel">
-            <span className="lime-label">ABOUT ME</span>
-            <h3>Hi, I am DuXin!</h3>
-            <p>
-              我把复杂业务流程、设计规范和视觉表达整合成可落地的产品体验。曾参与哔哩哔哩漫画会员体系与大型营销活动设计，近年主导数字化营销 SaaS 平台的 UI、组件库和体验规范建设。
-            </p>
+            <BlurText as="span" className="lime-label" text="ABOUT ME" delay={70} animateBy="words" direction="top" />
+            <BlurText as="h3" text="Hi, I am UUU!" delay={72} animateBy="words" direction="top" />
+            <BlurText
+              as="p"
+              text="####################。 ####################。 ####################。"
+              delay={90}
+              animateBy="words"
+              direction="bottom"
+            />
             <div className="info-grid">
               <div>
-                <small>当前身份</small>
-                <strong>UI Designer</strong>
+                <BlurText as="small" text="当前身份" delay={70} animateBy="letters" direction="top" />
+                <BlurText as="strong" text="UI Designer" delay={55} animateBy="words" direction="bottom" />
               </div>
               <div>
-                <small>服务方向</small>
-                <strong>B端 SaaS / C端会员 / 活动视觉</strong>
+                <BlurText as="small" text="服务方向" delay={70} animateBy="letters" direction="top" />
+                <BlurText as="strong" text="#### / #### / ####" delay={45} animateBy="words" direction="bottom" />
               </div>
               <div>
-                <small>手机</small>
-                <strong>17645050083</strong>
+                <BlurText as="small" text="手机" delay={70} animateBy="letters" direction="top" />
+                <BlurText as="strong" text="00000000000" delay={35} animateBy="letters" direction="bottom" />
               </div>
               <div>
-                <small>邮箱</small>
-                <strong>1923993777@qq.com</strong>
+                <BlurText as="small" text="邮箱" delay={70} animateBy="letters" direction="top" />
+                <BlurText as="strong" text="####" delay={45} animateBy="letters" direction="bottom" />
               </div>
             </div>
             <div className="stats-row">
               {stats.map((item) => (
                 <div key={item.label}>
-                  <strong>{item.value}</strong>
-                  <span>{item.label}</span>
+                  <BlurText as="strong" text={item.value} delay={45} animateBy="letters" direction="top" />
+                  <BlurText as="span" text={item.label} delay={70} animateBy="letters" direction="bottom" />
                 </div>
               ))}
             </div>
@@ -270,18 +322,29 @@ function Projects() {
     <section className="section projects" id="projects">
       <div className="shell">
         <div className="section-title">
-          <h2>SELECTED WORKS <span>↘</span></h2>
-          <p>项目入口</p>
+          <BlurText as="h2" text="SELECTED WORKS ↘" delay={42} animateBy="letters" direction="top" />
+          <BlurText as="p" text="项目入口" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="project-mosaic">
           {projects.map((project, index) => (
-            <a className={`work-tile tile-${index + 1}`} href="#contact" key={project.title}>
+            <BorderGlow
+              as="a"
+              className={`work-tile tile-${index + 1}`}
+              revealDelay={index * 0.09}
+              revealDirection={index % 2 === 0 ? 'bottom' : 'top'}
+              edgeSensitivity={24}
+              glowRadius={34}
+              glowIntensity={0.9}
+              fillOpacity={0.22}
+              href="#contact"
+              key={project.title}
+            >
               <img src={project.image} alt={`${project.title}作品入口`} />
               <div>
                 <h3>{project.title}</h3>
                 <p>{project.subtitle}</p>
               </div>
-            </a>
+            </BorderGlow>
           ))}
         </div>
       </div>
@@ -294,12 +357,12 @@ function Strengths() {
     <section className="section strengths" id="strengths">
       <div className="shell">
         <div className="section-title">
-          <h2>CORE STRENGTHS <span>↘</span></h2>
-          <p>个人优势</p>
+          <BlurText as="h2" text="CORE STRENGTHS ↘" delay={42} animateBy="letters" direction="top" />
+          <BlurText as="p" text="个人优势" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="strength-grid">
           {strengths.map((item, index) => (
-            <article className="strength-card" key={item.title}>
+            <BlurReveal as="article" className="strength-card" delay={index * 0.08} key={item.title}>
               <div className="card-meta">
                 <span>{String(index + 1).padStart(2, '0')}</span>
                 <em>{item.type}</em>
@@ -311,7 +374,7 @@ function Strengths() {
                 ))}
               </div>
               <i aria-hidden="true" />
-            </article>
+            </BlurReveal>
           ))}
         </div>
       </div>
@@ -323,7 +386,7 @@ function Contact() {
   return (
     <section className="contact-section" id="contact">
       <div className="shell contact-layout">
-        <div>
+        <div className="contact-copy">
           <p>联系方式</p>
           <h2>
             LET'S BUILD
@@ -331,17 +394,16 @@ function Contact() {
             SYSTEMS ↘
           </h2>
           <a className="brand-pill contact-brand" href="#top">
-            <span className="brand-mark">DX</span>
-            <span>DuXin</span>
+            <img className="brand-logo" src={asset('assets/logo-black.svg')} alt="" aria-hidden="true" />
           </a>
         </div>
         <aside className="contact-card">
           <h3>CONTACT</h3>
-          <a href="tel:17645050083">手机：17645050083</a>
-          <a href="mailto:1923993777@qq.com">邮箱：1923993777@qq.com</a>
-          <span>城市：上海</span>
-          <small>UI Design / SaaS / Visual System</small>
-          <div className="qr-mark">DX</div>
+          <a href="tel:00000000000">手机：00000000000</a>
+          <a href="#">邮箱：####</a>
+          <span>城市：XXX</span>
+          <small>#### / #### / ####</small>
+          <div className="qr-mark">UUU</div>
         </aside>
       </div>
     </section>
@@ -349,14 +411,28 @@ function Contact() {
 }
 
 export default function App() {
+  const [activeMedia, setActiveMedia] = useState(null);
+
   return (
     <main>
+      <SplashCursor
+        SIM_RESOLUTION={96}
+        DYE_RESOLUTION={720}
+        DENSITY_DISSIPATION={4.6}
+        VELOCITY_DISSIPATION={2.6}
+        SPLAT_RADIUS={0.16}
+        SPLAT_FORCE={4200}
+        COLOR_UPDATE_SPEED={4}
+        RAINBOW_MODE={false}
+        COLOR="#b8ff20"
+      />
       <Header />
-      <Hero />
+      <Hero onOpenMedia={setActiveMedia} />
       <Experience />
       <Projects />
       <Strengths />
       <Contact />
+      <MediaLightbox media={activeMedia} onClose={() => setActiveMedia(null)} />
     </main>
   );
 }

@@ -1,6 +1,6 @@
-# DuXin Portfolio
+# UUU Portfolio
 
-杜鑫个人作品集网站，使用 React、Vite 和 OGL 构建。页面包含首屏作品长廊、个人经历、精选作品、个人优势和联系方式。
+UUU 作品集网站，使用 React、Vite 和 OGL 构建。页面内容已做占位脱敏处理。
 
 ## 环境要求
 
