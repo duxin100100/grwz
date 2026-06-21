@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 
-import BlurReveal from './components/BlurReveal';
 import BlurText from './components/BlurText';
 import BorderGlow from './components/BorderGlow';
+import FlowingMenu from './components/FlowingMenu';
 import CircularGallery from './components/CircularGallery';
 import ProfileCard from './components/ProfileCard';
+import SpotlightCard from './components/SpotlightCard';
 import SplashCursor from './components/SplashCursor';
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
@@ -15,118 +17,146 @@ const navItems = [
   { label: '个人优势', href: '#strengths' }
 ];
 
-const heroWorks = [
-  {
-    title: 'XXXX-01',
-    label: '#### / ####',
-    image: asset('assets/project-saas.svg')
-  },
-  {
-    title: 'XXXX-02',
-    label: '#### / ####',
-    image: asset('assets/project-comic.svg')
-  },
-  {
-    title: 'XXXX-03',
-    label: '#### / ####',
-    image: asset('assets/project-campaign.svg')
-  },
-  {
-    title: 'XXXX-04',
-    label: '#### / ####',
-    image: asset('assets/project-system.svg')
-  },
-  {
-    title: 'XXXX-05',
-    label: '#### / ####',
-    image: asset('assets/project-benefit.svg')
-  },
-  {
-    title: 'XXXX-06',
-    label: '#### / ####',
-    image: asset('assets/project-ai.svg')
-  }
-];
+const heroWorks = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
+  title: `PHOTO-0${n}`,
+  label: 'UI Designer',
+  image: asset(`assets/个人照片/${String(n).padStart(2, '0')}.jpg`)
+}));
 
 const stats = [
-  { value: '10', label: '设计经验' },
-  { value: '30%', label: '效率提升' },
-  { value: '80%+', label: '场景复用' }
+  { value: '8+', label: '设计经验' },
+  { value: '50+', label: '落地项目' },
+  { value: '500万+', label: '月Token消耗' }
 ];
 
 const timeline = [
   {
-    time: '20XX.XX - 20XX.XX',
-    company: 'XXXX-01',
-    role: '####',
-    text: '##########，##########，##########。'
+    time: '2018.03 - 2018.06',
+    company: '小红书',
+    role: 'UI 设计实习生',
+    text: '参与 C 端页面及运营活动视觉设计。'
   },
   {
-    time: '20XX.XX - 20XX.XX',
-    company: 'XXXX-02',
-    role: '####',
-    text: '##########，##########，##########。'
+    time: '2018.07 - 2021.05',
+    company: '哔哩哔哩',
+    role: 'UI 设计师',
+    text: '负责漫画产品 UI 设计及会员、暑期活动项目。'
   },
   {
-    time: '20XX.XX - 20XX.XX',
-    company: 'XXXX-03',
-    role: '####',
-    text: '##########，##########，##########。'
+    time: '2021.06 - 至今',
+    company: '海湾汇信息科技',
+    role: '高级UI设计师 / 组长',
+    text: '负责 SaaS 平台 UI/UE 设计、组件规范及团队管理。'
   }
 ];
 
+const consumerGallery = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
+  asset(`assets/C端作品/${n}.${n <= 4 || n === 9 ? 'png' : 'gif'}`)
+);
+
+const businessGallery = ['整理01','整理02','整理03','整理04','整理05','整理06'].map((n) =>
+  asset(`assets/B端作品/${n}.png`)
+);
+
+const operationGallery = ['Slice 1','Slice 2','Slice 3','Slice 4','Slice 5'].map((n) =>
+  asset(`assets/运营作品/${n}.jpg`)
+);
+
+const brandGallery = [1,2,3,4,5,6].map((n) =>
+  asset(`assets/品牌作品/${n}.png`)
+);
+
 const projects = [
   {
-    title: 'XXXX-A',
-    subtitle: '#### ####',
-    image: asset('assets/project-comic.svg')
+    id: 'consumer',
+    index: '01',
+    category: 'C 端产品',
+    en: 'OPEN',
+    description: '海牙湾惊喜商城',
+    image: 'project-consumer-abstract.svg',
+    href: '#contact',
+    gallery: consumerGallery
   },
   {
-    title: 'XXXX-B',
-    subtitle: '#### ####',
-    image: asset('assets/project-saas.svg')
+    id: 'business',
+    index: '02',
+    category: 'B 端产品',
+    en: 'OPEN',
+    description: '商城 SaaS 运营管理平台',
+    image: 'project-business-abstract.svg',
+    href: '#contact',
+    gallery: businessGallery
   },
   {
-    title: 'XXXX-C',
-    subtitle: '#### ####',
-    image: asset('assets/project-campaign.svg')
+    id: 'operation',
+    index: '03',
+    category: '运营设计',
+    en: 'OPEN',
+    description: '农行小豆节气海报',
+    image: 'project-operation-abstract.svg',
+    href: '#contact',
+    gallery: operationGallery
   },
   {
-    title: 'XXXX-D',
-    subtitle: '#### ####',
-    image: asset('assets/project-system.svg')
+    id: 'brand',
+    index: '04',
+    category: '品牌 IP',
+    en: 'OPEN',
+    description: '海牙湾 IOP 设计',
+    image: 'project-brand-abstract.svg',
+    href: '#contact',
+    gallery: brandGallery
+  },
+  {
+    id: 'ecommerce',
+    index: '05',
+    category: '视频剪辑',
+    en: 'OPEN',
+    description: '平时的一些自拍视频',
+    image: 'project-brand-abstract.svg',
+    href: '#contact',
+    videos: [
+      { label: '泰山', type: 'video', src: asset('assets/泰山.mp4') },
+      { label: '黄山', type: 'video', src: asset('assets/黄山.mp4') },
+      { label: '照片', type: 'photos', images: [
+        asset('assets/个人照片/01.jpg'),
+        asset('assets/个人照片/02.jpg'),
+        asset('assets/个人照片/03.jpg'),
+        asset('assets/个人照片/05.jpg'),
+      ]},
+    ]
   }
 ];
 
 const strengths = [
   {
-    title: '########',
+    title: '复杂问题解决',
     type: 'CORE',
-    tags: ['####', '####', '####']
+    tags: ['快速理解需求', '关键问题判断', '高质量方案落地']
   },
   {
-    title: '########',
+    title: '设计管理统筹',
     type: 'SYSTEM',
-    tags: ['####', '####', '####']
+    tags: ['多项目并行排期', '设计标准与复盘沉淀', '稳定交付与风险控制']
   },
   {
-    title: '########',
+    title: '业务增长思维',
     type: 'GROWTH',
-    tags: ['####', '####', '####']
+    tags: ['核心目标拆解', '数据反馈验证', '持续迭代优化']
   },
   {
-    title: '########',
+    title: '多场景视觉设计',
     type: 'VISUAL',
-    tags: ['####', '####', '####']
+    tags: ['B/C端产品设计', '运营活动设计', '品牌视觉表达', '动效设计']
   },
   {
-    title: '########',
+    title: 'AI 工作流提效',
     type: 'AIGC',
-    tags: ['####', '####', '####']
+    tags: ['AI辅助创作', '独立建站落地', '设计流程提效']
   }
 ];
 
-function Header() {
+function Header({ activeSection, onNavigate }) {
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -135,7 +165,13 @@ function Header() {
         </a>
         <nav aria-label="主导航">
           {navItems.map((item) => (
-            <a key={item.href} href={item.href}>
+            <a
+              className={activeSection === item.href.slice(1) ? 'is-active' : undefined}
+              aria-current={activeSection === item.href.slice(1) ? 'page' : undefined}
+              key={item.href}
+              href={item.href}
+              onClick={(event) => onNavigate(event, item.href.slice(1))}
+            >
               {item.label}
             </a>
           ))}
@@ -161,38 +197,56 @@ function Hero({ onOpenMedia }) {
 
   return (
     <section className="hero" id="top">
-      <div className="hero-video-placeholder" aria-hidden="true" />
+      <video
+        className="hero-video-placeholder"
+        src={asset('assets/hero-video.webm')}
+        autoPlay
+        loop
+        muted
+        playsInline
+        aria-hidden="true"
+      />
       <div className="hero-scrim" />
       <div className="hero-content shell">
-        <p className="eyebrow">Portfolio 2026 / UI Designer</p>
         <h1>
-          UUU
-          <span>PORTFOLIO</span>
+          <img className="hero-logo" src={asset('assets/logo-lime.svg')} alt="杜鑫 DX" />
+          <span className="hero-title-row">
+            <span>PORTFOLIO</span>
+            <img className="hero-sig" src={asset('assets/签名.png')} alt="" aria-hidden="true" />
+          </span>
         </h1>
         <p className="hero-copy">
-          ##########，##########，##########。
+          以视觉系统与 AI 工作流，打造更高效、更具辨识度的数字体验。
         </p>
+        <a className="hero-cta" href="#experience">
+          了解我
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </a>
       </div>
-      <div className="hero-gallery" aria-label="作品画廊">
-        <CircularGallery
-          items={galleryItems}
-          bend={2.8}
-          textColor="#f6f8f4"
-          borderRadius={0.06}
-          font="bold 18px Arial"
-          scrollSpeed={1.7}
-          scrollEase={0.035}
-          autoScrollSpeed={-0.012}
-          onSelect={onOpenMedia}
-        />
+      <div className="hero-bottom-bar">
+        <div className="hero-bottom-inner shell">
+          <div className="hero-bottom-left">
+            <span className="hero-avail-dot" />
+            <span>Work Location: Shanghai</span>
+          </div>
+          <div className="hero-bottom-right">
+            <span>SCROLL</span>
+            <span className="hero-scroll-arrow">↓</span>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
 function MediaLightbox({ media, onClose }) {
+  const [activeTab, setActiveTab] = useState(0);
+
   useEffect(() => {
     if (!media) return undefined;
+    setActiveTab(0);
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') onClose();
     };
@@ -207,7 +261,86 @@ function MediaLightbox({ media, onClose }) {
 
   if (!media) return null;
 
+  const isGallery = media.type === 'gallery';
+  const isVideos = media.type === 'videos';
   const isVideo = media.mediaType === 'video';
+
+  if (isVideos) {
+    const current = media.videos[activeTab];
+    return (
+      <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={media.title}>
+        <button className="media-lightbox__backdrop" type="button" aria-label="关闭预览" onClick={() => { window.dispatchEvent(new Event('music-resume')); onClose(); }} />
+        <div className="media-lightbox__panel media-lightbox__panel--videos">
+          <div className="media-lightbox__gallery-header">
+            <div className="video-tabs">
+              {media.videos.map((v, i) => (
+                <button
+                  key={v.label}
+                  className={`video-tab-btn${activeTab === i ? ' active' : ''}`}
+                  onClick={() => setActiveTab(i)}
+                  type="button"
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            <button className="media-lightbox__close media-lightbox__gallery-close" type="button" aria-label="关闭" onClick={() => { window.dispatchEvent(new Event('music-resume')); onClose(); }}>
+              <span aria-hidden="true" />
+            </button>
+          </div>
+          <div className="video-lightbox-stage">
+            {current.type === 'photos' ? (
+              <div className="video-lightbox-photos">
+                {current.images.map((src, i) => (
+                  <img key={src} src={src} alt={`照片 ${i + 1}`} className="video-lightbox-photo" />
+                ))}
+              </div>
+            ) : (
+              <video
+                key={current.src}
+                className="video-lightbox-player"
+                src={current.src}
+                controls
+                autoPlay
+                playsInline
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isGallery) {
+    return (
+      <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={media.title || '作品预览'}>
+        <button className="media-lightbox__backdrop" type="button" aria-label="关闭预览" onClick={onClose} />
+        <div className="media-lightbox__panel media-lightbox__panel--gallery">
+          <div className="media-lightbox__gallery-header">
+            <h4>{media.title}</h4>
+            <button
+              className="media-lightbox__close media-lightbox__gallery-close"
+              type="button"
+              aria-label="关闭预览"
+              onClick={onClose}
+            >
+              <span aria-hidden="true" />
+            </button>
+          </div>
+          <div className="media-lightbox__gallery-scroll">
+            {media.images.map((src, i) => (
+              <img
+                key={src}
+                className="media-lightbox__gallery-img"
+                src={src}
+                alt={`${media.title} ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={media.title || '作品预览'}>
@@ -241,74 +374,96 @@ function Experience() {
           <BlurText as="p" text="个人经历" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="experience-grid">
-          <BlurReveal className="profile-card-frame" delay={0.12} direction="bottom" duration={0.78} distance={36}>
-            <ProfileCard
-              className="profile-card-static"
-              name="UUU"
-              title="UI Designer"
-              handle="uuu.mask"
-              avatarUrl={asset('assets/profile-gray.png')}
-              status="XX YEARS / #### / #### / ####"
-              contactText="Contact"
-              showUserInfo
-              enableTilt
-              enableMobileTilt={false}
-              onContactClick={handleProfileContact}
-              behindGlowEnabled={false}
-              behindGlowColor="rgba(184, 255, 32, 0.48)"
-              behindGlowSize="58%"
-              innerGradient="linear-gradient(145deg, rgba(12,18,18,0.96) 0%, rgba(42,68,48,0.86) 48%, rgba(184,255,32,0.28) 100%)"
-            />
-          </BlurReveal>
-          <div className="about-panel">
-            <BlurText as="span" className="lime-label" text="ABOUT ME" delay={70} animateBy="words" direction="top" />
-            <BlurText as="h3" text="Hi, I am UUU!" delay={72} animateBy="words" direction="top" />
-            <BlurText
-              as="p"
-              text="####################。 ####################。 ####################。"
-              delay={90}
-              animateBy="words"
-              direction="bottom"
-            />
+          <motion.div
+            className="profile-card-frame"
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <SpotlightCard
+              className="profile-spotlight"
+              spotlightColor="rgba(184, 255, 32, 0.12)"
+            >
+              <ProfileCard
+                className="profile-card-static"
+                name="杜鑫"
+                title="UI Designer"
+                handle="dx.design"
+                avatarUrl={asset('assets/个人ip.png')}
+                status="8 YEARS / SaaS / B端 / C端"
+                contactText="Contact"
+                showUserInfo
+                enableTilt={false}
+                enableMobileTilt={false}
+                onContactClick={handleProfileContact}
+                behindGlowEnabled={false}
+                behindGlowColor="rgba(184, 255, 32, 0.48)"
+                behindGlowSize="58%"
+                innerGradient="linear-gradient(145deg, rgba(12,18,18,0.96) 0%, rgba(42,68,48,0.86) 48%, rgba(184,255,32,0.28) 100%)"
+              />
+            </SpotlightCard>
+          </motion.div>
+          <motion.div
+            className="about-panel"
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <span className="lime-label">ABOUT ME</span>
+            <h3>你好，我叫杜鑫</h3>
+            <p>擅长从产品目标出发，把复杂业务转译成有温度、可落地的界面，从信息架构、交互流程到视觉系统，一并交付。</p>
             <div className="info-grid">
               <div>
-                <BlurText as="small" text="当前身份" delay={70} animateBy="letters" direction="top" />
-                <BlurText as="strong" text="UI Designer" delay={55} animateBy="words" direction="bottom" />
+                <small>当前身份</small>
+                <strong>UI Designer</strong>
               </div>
               <div>
-                <BlurText as="small" text="服务方向" delay={70} animateBy="letters" direction="top" />
-                <BlurText as="strong" text="#### / #### / ####" delay={45} animateBy="words" direction="bottom" />
+                <small>服务方向</small>
+                <strong>B端 / C端 / 运营 / 品牌</strong>
               </div>
               <div>
-                <BlurText as="small" text="手机" delay={70} animateBy="letters" direction="top" />
-                <BlurText as="strong" text="00000000000" delay={35} animateBy="letters" direction="bottom" />
+                <small>手机</small>
+                <strong>17645050083</strong>
               </div>
               <div>
-                <BlurText as="small" text="邮箱" delay={70} animateBy="letters" direction="top" />
-                <BlurText as="strong" text="####" delay={45} animateBy="letters" direction="bottom" />
+                <small>邮箱</small>
+                <strong>1923993777@qq.com</strong>
               </div>
             </div>
             <div className="stats-row">
               {stats.map((item) => (
                 <div key={item.label}>
-                  <BlurText as="strong" text={item.value} delay={45} animateBy="letters" direction="top" />
-                  <BlurText as="span" text={item.label} delay={70} animateBy="letters" direction="bottom" />
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
         <div className="career-path">
-          <span>CAREER PATH</span>
-          <div className="path-line" />
+          <span className="lime-label">CAREER PATH</span>
+          <div className="path-line-reveal">
+            <div className="path-line" />
+          </div>
           <div className="timeline-grid">
-            {timeline.map((job) => (
-              <article key={job.company}>
+            {timeline.map((job, i) => (
+              <motion.article
+                className="timeline-item"
+                key={job.company}
+                initial={{ opacity: 0, x: -24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.6, delay: i * 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
                 <time>{job.time}</time>
-                <h4>{job.company}</h4>
-                <strong>{job.role}</strong>
+                <div className="timeline-company-row">
+                  <h4>{job.company}</h4>
+                  <strong>{job.role}</strong>
+                </div>
                 <p>{job.text}</p>
-              </article>
+              </motion.article>
             ))}
           </div>
         </div>
@@ -317,40 +472,134 @@ function Experience() {
   );
 }
 
-function Projects() {
+function Projects({ onOpenMedia }) {
+  const handleSelect = (item) => {
+    if (item.gallery) {
+      onOpenMedia({ type: 'gallery', title: item.category, images: item.gallery });
+    } else if (item.videos) {
+      window.dispatchEvent(new Event('music-pause'));
+      onOpenMedia({ type: 'videos', title: item.category, videos: item.videos });
+    } else {
+      window.location.href = item.href;
+    }
+  };
+
   return (
     <section className="section projects" id="projects">
       <div className="shell">
         <div className="section-title">
           <BlurText as="h2" text="SELECTED WORKS ↘" delay={42} animateBy="letters" direction="top" />
-          <BlurText as="p" text="项目入口" delay={90} animateBy="letters" direction="bottom" />
+          <BlurText as="p" text="作品展示" delay={90} animateBy="letters" direction="bottom" />
         </div>
-        <div className="project-mosaic">
-          {projects.map((project, index) => (
-            <BorderGlow
-              as="a"
-              className={`work-tile tile-${index + 1}`}
-              revealDelay={index * 0.09}
-              revealDirection={index % 2 === 0 ? 'bottom' : 'top'}
-              edgeSensitivity={24}
-              glowRadius={34}
-              glowIntensity={0.9}
-              fillOpacity={0.22}
-              href="#contact"
-              key={project.title}
-            >
-              <img src={project.image} alt={`${project.title}作品入口`} />
-              <div>
-                <h3>{project.title}</h3>
-                <p>{project.subtitle}</p>
-              </div>
-            </BorderGlow>
-          ))}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <FlowingMenu
+            items={projects}
+            marqueeBgColor="#b8ff20"
+            marqueeTextColor="#030506"
+            speed={18}
+            onSelect={handleSelect}
+          />
+        </motion.div>
       </div>
     </section>
   );
 }
+
+const strengthIcons = {
+  /* 01 CORE — 双圆交叠，视觉体量与其他统一 */
+  CORE: (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="si-core-a" cx="38%" cy="35%" r="62%">
+          <stop offset="0%" stopColor="#b8ff20" stopOpacity="0.95"/>
+          <stop offset="100%" stopColor="#b8ff20" stopOpacity="0.1"/>
+        </radialGradient>
+        <radialGradient id="si-core-b" cx="62%" cy="65%" r="60%">
+          <stop offset="0%" stopColor="#7c5af8" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#7c5af8" stopOpacity="0.05"/>
+        </radialGradient>
+      </defs>
+      <circle cx="40" cy="40" r="26" fill="url(#si-core-a)"/>
+      <circle cx="60" cy="60" r="22" fill="url(#si-core-b)"/>
+      <circle cx="50" cy="50" r="10" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+      <circle cx="48" cy="47" r="4" fill="white" fillOpacity="0.7"/>
+    </svg>
+  ),
+  /* 02 SYSTEM — 等距平台 + 浮球 */
+  SYSTEM: (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="si-sys-top" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#b8ff20" stopOpacity="0.95"/>
+          <stop offset="100%" stopColor="#b8ff20" stopOpacity="0.55"/>
+        </linearGradient>
+      </defs>
+      <path d="M50 20 L82 38 L50 56 L18 38 Z" fill="url(#si-sys-top)"/>
+      <path d="M18 38 L50 56 L50 78 L18 60 Z" fill="#b8ff20" fillOpacity="0.28"/>
+      <path d="M50 56 L82 38 L82 60 L50 78 Z" fill="#7c5af8" fillOpacity="0.55"/>
+      <circle cx="72" cy="30" r="11" fill="#7c5af8" fillOpacity="0.85"/>
+      <circle cx="69" cy="27" r="4.5" fill="white" fillOpacity="0.45"/>
+    </svg>
+  ),
+  /* 03 GROWTH — 三段递升色块 */
+  GROWTH: (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="si-grow-1" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#7c5af8" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#7c5af8" stopOpacity="0.35"/>
+        </linearGradient>
+        <linearGradient id="si-grow-2" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#b8ff20" stopOpacity="0.85"/>
+          <stop offset="100%" stopColor="#7c5af8" stopOpacity="0.55"/>
+        </linearGradient>
+        <linearGradient id="si-grow-3" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#b8ff20" stopOpacity="0.95"/>
+          <stop offset="100%" stopColor="#b8ff20" stopOpacity="0.45"/>
+        </linearGradient>
+      </defs>
+      {/* 左：最矮 */}
+      <rect x="20" y="64" width="16" height="18" rx="4" fill="url(#si-grow-1)"/>
+      {/* 中：中高 */}
+      <rect x="42" y="48" width="16" height="34" rx="4" fill="url(#si-grow-2)"/>
+      {/* 右：最高 */}
+      <rect x="64" y="28" width="16" height="54" rx="4" fill="url(#si-grow-3)"/>
+      {/* 顶部高光点 */}
+      <circle cx="72" cy="26" r="4" fill="white" fillOpacity="0.65"/>
+    </svg>
+  ),
+  /* 04 VISUAL — 三层叠框（缩小到 ~60px 视觉区） */
+  VISUAL: (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="28" y="16" width="52" height="36" rx="6" fill="#7c5af8" fillOpacity="0.5"/>
+      <rect x="20" y="30" width="52" height="36" rx="6" fill="#b8ff20" fillOpacity="0.55"/>
+      <rect x="12" y="44" width="52" height="36" rx="6" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5"/>
+      <rect x="12" y="44" width="52" height="8"  rx="4" fill="white" fillOpacity="0.22"/>
+    </svg>
+  ),
+  /* 05 AIGC — 循环双弧（r=28，视觉区 ~56px） */
+  AIGC: (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="si-ai-arc" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#b8ff20" stopOpacity="0.95"/>
+          <stop offset="100%" stopColor="#b8ff20" stopOpacity="0.3"/>
+        </linearGradient>
+      </defs>
+      <path d="M50 22 A28 28 0 1 1 22 50" stroke="url(#si-ai-arc)" strokeWidth="12" strokeLinecap="round" fill="none"/>
+      <path d="M50 78 A28 28 0 0 1 78 50" stroke="#7c5af8" strokeWidth="12" strokeLinecap="round" fill="none" strokeOpacity="0.8"/>
+      <path d="M22 50 L15 40 L27 43 Z" fill="#b8ff20" fillOpacity="0.9"/>
+      <path d="M50 78 L40 85 L43 73 Z" fill="#7c5af8" fillOpacity="0.8"/>
+      <circle cx="50" cy="50" r="8" fill="rgba(255,255,255,0.15)"/>
+      <circle cx="50" cy="50" r="3.5" fill="white" fillOpacity="0.6"/>
+    </svg>
+  ),
+};
 
 function Strengths() {
   return (
@@ -362,7 +611,14 @@ function Strengths() {
         </div>
         <div className="strength-grid">
           {strengths.map((item, index) => (
-            <BlurReveal as="article" className="strength-card" delay={index * 0.08} key={item.title}>
+            <motion.article
+              className="strength-card"
+              key={`${item.type}-${index}`}
+              initial={{ opacity: 0, y: 36 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.55, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
               <div className="card-meta">
                 <span>{String(index + 1).padStart(2, '0')}</span>
                 <em>{item.type}</em>
@@ -373,8 +629,10 @@ function Strengths() {
                   <span key={tag}>{tag}</span>
                 ))}
               </div>
-              <i aria-hidden="true" />
-            </BlurReveal>
+              <div className="strength-card__icon">
+                {strengthIcons[item.type]}
+              </div>
+            </motion.article>
           ))}
         </div>
       </div>
@@ -387,34 +645,163 @@ function Contact() {
     <section className="contact-section" id="contact">
       <div className="shell contact-layout">
         <div className="contact-copy">
-          <p>联系方式</p>
+          <BlurText as="p" text="联系方式" delay={90} animateBy="letters" direction="top" />
           <h2>
-            LET'S BUILD
+            <span>{"LET'S BUILD"}</span>
             <span>BETTER VISUAL</span>
-            SYSTEMS ↘
+            <span>SYSTEMS ↘</span>
           </h2>
           <a className="brand-pill contact-brand" href="#top">
             <img className="brand-logo" src={asset('assets/logo-black.svg')} alt="" aria-hidden="true" />
           </a>
         </div>
-        <aside className="contact-card">
+        <BorderGlow
+          as="aside"
+          className="contact-card"
+          edgeSensitivity={24}
+          glowRadius={34}
+          glowIntensity={0.9}
+          fillOpacity={0.18}
+          revealDelay={0.08}
+          revealDirection="bottom"
+          backgroundColor="rgba(24, 30, 25, 0.76)"
+          borderRadius={24}
+        >
           <h3>CONTACT</h3>
-          <a href="tel:00000000000">手机：00000000000</a>
-          <a href="#">邮箱：####</a>
-          <span>城市：XXX</span>
-          <small>#### / #### / ####</small>
-          <div className="qr-mark">UUU</div>
-        </aside>
+          <a href="tel:17645050083">手机：17645050083</a>
+          <a href="mailto:1923993777@qq.com">邮箱：1923993777@qq.com</a>
+          <span>城市：上海</span>
+          <small>我的微信号</small>
+          <div className="qr-mark">
+            <img src={asset('assets/wx.png')} alt="微信二维码" />
+          </div>
+        </BorderGlow>
       </div>
     </section>
   );
 }
 
+function MusicPlayer() {
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.5;
+
+    const tryPlay = () => {
+      audio.play().then(() => setPlaying(true)).catch(() => {});
+      ['click', 'keydown', 'touchstart'].forEach(e =>
+        document.removeEventListener(e, tryPlay)
+      );
+    };
+
+    audio.play().then(() => setPlaying(true)).catch(() => {
+      ['click', 'keydown', 'touchstart'].forEach(e =>
+        document.addEventListener(e, tryPlay, { once: true })
+      );
+    });
+
+    const onPause = () => { audio.pause(); setPlaying(false); };
+    const onResume = () => { audio.play().then(() => setPlaying(true)).catch(() => {}); };
+
+    window.addEventListener('music-pause', onPause);
+    window.addEventListener('music-resume', onResume);
+
+    return () => {
+      ['click', 'keydown', 'touchstart'].forEach(e =>
+        document.removeEventListener(e, tryPlay)
+      );
+      window.removeEventListener('music-pause', onPause);
+      window.removeEventListener('music-resume', onResume);
+    };
+  }, []);
+
+  const toggle = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setPlaying(!playing);
+  };
+
+  return (
+    <div className="music-player">
+      <audio ref={audioRef} src={asset('assets/music.mp3')} loop />
+      <button className="music-btn" onClick={toggle} aria-label={playing ? '暂停音乐' : '播放音乐'}>
+        {playing ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18V5l12-2v13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8"/>
+            <circle cx="18" cy="16" r="3" stroke="currentColor" strokeWidth="1.8"/>
+          </svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18V5l12-2v13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8"/>
+            <circle cx="18" cy="16" r="3" stroke="currentColor" strokeWidth="1.8"/>
+            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
 export default function App() {
   const [activeMedia, setActiveMedia] = useState(null);
+  const [activeSection, setActiveSection] = useState('');
+
+  const scrollToSection = useCallback((event, sectionId) => {
+    event.preventDefault();
+    const section = document.getElementById(sectionId);
+    const title = section?.querySelector('.section-title');
+    const target = title || section;
+    if (!target) return;
+
+    const headerOffset = 122;
+    const top = window.scrollY + target.getBoundingClientRect().top - headerOffset;
+    window.scrollTo({ top, behavior: 'smooth' });
+    window.history.replaceState(null, '', `#${sectionId}`);
+    setActiveSection(sectionId);
+  }, []);
+
+  useEffect(() => {
+    const sectionIds = navItems.map((item) => item.href.slice(1));
+
+    const updateActiveSection = () => {
+      const anchorLine = Math.min(window.innerHeight * 0.34, 320);
+      let current = '';
+
+      sectionIds.forEach((sectionId) => {
+        const section = document.getElementById(sectionId);
+        const title = section?.querySelector('.section-title');
+        const target = title || section;
+        if (target && target.getBoundingClientRect().top <= anchorLine) {
+          current = sectionId;
+        }
+      });
+
+      setActiveSection(current);
+    };
+
+    updateActiveSection();
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+    window.addEventListener('resize', updateActiveSection);
+
+    return () => {
+      window.removeEventListener('scroll', updateActiveSection);
+      window.removeEventListener('resize', updateActiveSection);
+    };
+  }, []);
 
   return (
     <main>
+      <MusicPlayer />
       <SplashCursor
         SIM_RESOLUTION={96}
         DYE_RESOLUTION={720}
@@ -426,10 +813,10 @@ export default function App() {
         RAINBOW_MODE={false}
         COLOR="#b8ff20"
       />
-      <Header />
+      <Header activeSection={activeSection} onNavigate={scrollToSection} />
       <Hero onOpenMedia={setActiveMedia} />
       <Experience />
-      <Projects />
+      <Projects onOpenMedia={setActiveMedia} />
       <Strengths />
       <Contact />
       <MediaLightbox media={activeMedia} onClose={() => setActiveMedia(null)} />

@@ -1,0 +1,156 @@
+/* ─────────────────────────────────────────────
+   FlowingMenu — direction-aware hover marquee
+   ───────────────────────────────────────────── */
+
+.fm-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-top: 1px solid var(--line);
+}
+
+.fm-item {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items: center;
+  gap: 36px;
+  padding: 36px 8px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 120px;
+  transition: padding-left 220ms ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Index number ── */
+.fm-item__index {
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--lime);
+  transition: color 220ms ease;
+}
+
+/* ── Body: category + description ── */
+.fm-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fm-item__cat {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  transition: color 220ms ease;
+}
+
+.fm-item__desc {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+  transition: color 220ms ease;
+}
+
+/* ── Right tag pill ── */
+.fm-item__tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 220ms ease, color 220ms ease;
+}
+
+.fm-item__arrow {
+  font-size: 20px;
+  color: var(--faint);
+  transition: transform 220ms ease, color 220ms ease;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Marquee overlay — sits above static row content ── */
+.fm-marquee {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.fm-marquee__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  white-space: nowrap;
+  /* animation-duration overridden by inline style (speed prop) */
+  animation: fm-scroll linear infinite;
+  will-change: transform;
+}
+
+@keyframes fm-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.fm-marquee__set {
+  display: inline-flex;
+  align-items: center;
+  gap: 36px;
+  padding-right: 36px;
+}
+
+.fm-marquee__text {
+  font-size: 30px;
+  font-weight: 780;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Capsule / pill shape — matches reference */
+.fm-marquee__img {
+  height: 62px;
+  width: 130px;
+  object-fit: cover;
+  border-radius: 999px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .fm-item {
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    padding: 28px 8px;
+    min-height: 96px;
+  }
+
+  .fm-item__tag { display: none; }
+  .fm-item__cat { font-size: 24px; }
+  .fm-marquee__text { font-size: 22px; }
+  .fm-marquee__img { height: 48px; width: 96px; }
+}
