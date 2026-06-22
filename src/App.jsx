@@ -9,7 +9,8 @@ import SpotlightCard from './components/SpotlightCard';
 import SplashCursor from './components/SplashCursor';
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
-const HERO_VIDEO_SRC = asset('assets/hero-video.webm');
+const HERO_VIDEO_MP4_SRC = asset('assets/hero-video.mp4');
+const HERO_VIDEO_WEBM_SRC = asset('assets/hero-video.webm');
 
 const navItems = [
   { label: '工作经历', href: '#experience' },
@@ -213,6 +214,19 @@ function getBufferedPercent(video) {
 function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
   const videoRef = useRef(null);
 
+  const playHeroVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.play?.().catch(() => {});
+  }, []);
+
   const syncVideoProgress = useCallback(() => {
     const video = videoRef.current;
     const percent = getBufferedPercent(video);
@@ -224,36 +238,65 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
     if (percent >= 100 || video?.readyState >= 2) {
       onHeroVideoProgress(100);
       onHeroVideoReady();
+      playHeroVideo();
     }
-  }, [onHeroVideoProgress, onHeroVideoReady]);
+  }, [onHeroVideoProgress, onHeroVideoReady, playHeroVideo]);
+
+  useEffect(() => {
+    playHeroVideo();
+
+    const handleUserGesture = () => playHeroVideo();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) playHeroVideo();
+    };
+
+    document.addEventListener('WeixinJSBridgeReady', handleUserGesture);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('touchstart', handleUserGesture, { once: true, passive: true });
+    document.addEventListener('click', handleUserGesture, { once: true });
+
+    return () => {
+      document.removeEventListener('WeixinJSBridgeReady', handleUserGesture);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('touchstart', handleUserGesture);
+      document.removeEventListener('click', handleUserGesture);
+    };
+  }, [playHeroVideo]);
 
   useEffect(() => {
     const fallback = window.setTimeout(() => {
       onHeroVideoProgress(100);
       onHeroVideoReady();
+      playHeroVideo();
     }, 4000);
 
     return () => window.clearTimeout(fallback);
-  }, [onHeroVideoProgress, onHeroVideoReady]);
+  }, [onHeroVideoProgress, onHeroVideoReady, playHeroVideo]);
 
   return (
     <section className="hero" id="top">
       <video
         ref={videoRef}
         className="hero-video-placeholder"
-        src={HERO_VIDEO_SRC}
         preload="auto"
         autoPlay
         loop
         muted
+        defaultMuted
         playsInline
+        webkit-playsinline=""
+        x5-playsinline=""
+        x5-video-player-type="h5"
         aria-hidden="true"
         onLoadedMetadata={syncVideoProgress}
         onLoadedData={syncVideoProgress}
         onProgress={syncVideoProgress}
         onCanPlay={syncVideoProgress}
         onCanPlayThrough={syncVideoProgress}
-      />
+      >
+        <source src={HERO_VIDEO_MP4_SRC} type="video/mp4" />
+        <source src={HERO_VIDEO_WEBM_SRC} type="video/webm" />
+      </video>
       <div className="hero-scrim" />
       <div className="hero-content shell">
         <h1>
