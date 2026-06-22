@@ -761,7 +761,14 @@ video {
 .section-heading__arrow {
   width: 0.78em;
   height: 0.78em;
+  display: block;
   color: var(--lime);
+}
+
+.section-heading__arrow-wrap {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.02em;
   flex: 0 0 auto;
 }
 

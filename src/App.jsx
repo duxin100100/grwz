@@ -173,17 +173,49 @@ const strengths = [
 function DownRightArrow({ className = '' }) {
   return (
     <svg className={className} viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <path d="M9 9h18v18" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9 27 27 9" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 9 27 27" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M27 13v14H13" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
 function SectionHeading({ title }) {
+  const [inView, setInView] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current) return undefined;
+    const node = ref.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(node);
+        }
+      },
+      { threshold: 0.25, rootMargin: '0px 0px -8% 0px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <h2 className="section-heading">
+    <h2 ref={ref} className="section-heading">
       <BlurText as="span" text={title} delay={42} animateBy="letters" direction="top" />
-      <DownRightArrow className="section-heading__arrow" />
+      <motion.span
+        className="section-heading__arrow-wrap"
+        initial={{ filter: 'blur(12px)', opacity: 0, y: -36 }}
+        animate={inView
+          ? {
+              filter: ['blur(12px)', 'blur(5px)', 'blur(0px)'],
+              opacity: [0, 0.55, 1],
+              y: [-36, 4, 0]
+            }
+          : { filter: 'blur(12px)', opacity: 0, y: -36 }}
+        transition={{ duration: 0.84, times: [0, 0.5, 1], delay: Math.min(title.length * 0.042, 1.05), ease: [0.22, 1, 0.36, 1] }}
+      >
+        <DownRightArrow className="section-heading__arrow" />
+      </motion.span>
     </h2>
   );
 }
