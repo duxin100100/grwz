@@ -60,6 +60,19 @@ const brandGallery = [1,2,3,4,5,6].map((n) =>
   asset(`assets/品牌作品/${n}.png`)
 );
 
+const summerActivityGallery = [
+  '01.png', '02.png', '03.png', '04.png', '05.png', '06.png', '07.png', '08.png',
+  '09.png', '10.gif', '11.png', '12.png', '13.png', '14.png', '15.gif', '16.png',
+  '17.png', '18.png', '19.png', '20.png', '21.gif', '22.gif', '23.png', '24.gif'
+].map((file) => asset(`assets/暑期活动/${file}`));
+
+const comicClubGallery = [
+  '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg',
+  '10.jpg', '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '17.jpg',
+  '18.jpg', '19.jpg', '20.gif', '21.jpg', '22.gif', '23.jpg', '24.jpg', '25.jpg',
+  '26.jpg', '27.jpg', '28.jpg', '29.jpg'
+].map((file) => asset(`assets/超漫俱乐部/${file}`));
+
 const projects = [
   {
     id: 'consumer',
@@ -82,24 +95,30 @@ const projects = [
     gallery: businessGallery
   },
   {
-    id: 'operation',
+    id: 'operation-brand',
     index: '03',
-    category: '运营设计',
+    category: '运营/品牌设计',
     en: 'OPEN',
-    description: '农行小豆节气海报',
+    description: '节气海报/IP设计',
     image: 'project-operation-abstract.svg',
     href: '#contact',
-    gallery: operationGallery
+    tabs: [
+      { label: '节气海报', type: 'gallery', images: operationGallery },
+      { label: 'IP设计', type: 'gallery', images: brandGallery },
+    ]
   },
   {
-    id: 'brand',
+    id: 'bilibili',
     index: '04',
-    category: '品牌 IP',
+    category: '哔哩哔哩',
     en: 'OPEN',
-    description: '海牙湾 IOP 设计',
+    description: '暑期活动/超漫俱乐部',
     image: 'project-brand-abstract.svg',
     href: '#contact',
-    gallery: brandGallery
+    tabs: [
+      { label: '暑期活动', type: 'gallery', images: summerActivityGallery },
+      { label: '超漫俱乐部', type: 'gallery', images: comicClubGallery },
+    ]
   },
   {
     id: 'ecommerce',
@@ -317,8 +336,53 @@ function MediaLightbox({ media, onClose }) {
   if (!media) return null;
 
   const isGallery = media.type === 'gallery';
+  const isTabbed = media.type === 'tabs';
   const isVideos = media.type === 'videos';
   const isVideo = media.mediaType === 'video';
+
+  if (isTabbed) {
+    const current = media.tabs[activeTab];
+    return (
+      <div className="media-lightbox" role="dialog" aria-modal="true" aria-label={media.title}>
+        <button className="media-lightbox__backdrop" type="button" aria-label="关闭预览" onClick={onClose} />
+        <div className="media-lightbox__panel media-lightbox__panel--gallery media-lightbox__panel--tabs">
+          <div className="media-lightbox__gallery-header">
+            <div className="video-tabs">
+              {media.tabs.map((tab, i) => (
+                <button
+                  key={tab.label}
+                  className={`video-tab-btn${activeTab === i ? ' active' : ''}`}
+                  onClick={() => setActiveTab(i)}
+                  type="button"
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <button
+              className="media-lightbox__close media-lightbox__gallery-close"
+              type="button"
+              aria-label="关闭预览"
+              onClick={onClose}
+            >
+              <span aria-hidden="true" />
+            </button>
+          </div>
+          <div className="media-lightbox__gallery-scroll">
+            {current.images.map((src, i) => (
+              <img
+                key={src}
+                className="media-lightbox__gallery-img"
+                src={src}
+                alt={`${current.label} ${i + 1}`}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isVideos) {
     const current = media.videos[activeTab];
@@ -531,6 +595,8 @@ function Projects({ onOpenMedia }) {
   const handleSelect = (item) => {
     if (item.gallery) {
       onOpenMedia({ type: 'gallery', title: item.category, images: item.gallery });
+    } else if (item.tabs) {
+      onOpenMedia({ type: 'tabs', title: item.category, tabs: item.tabs });
     } else if (item.videos) {
       window.dispatchEvent(new Event('music-pause'));
       onOpenMedia({ type: 'videos', title: item.category, videos: item.videos });
