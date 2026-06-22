@@ -705,6 +705,22 @@ video {
   flex-shrink: 0;
 }
 
+.media-lightbox__gallery-img.is-loading-first {
+  min-height: min(62vh, 720px);
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.media-lightbox__gallery-loading {
+  display: grid;
+  min-height: 72px;
+  place-items: center;
+  color: rgba(246, 248, 244, 0.46);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
 .section {
   position: relative;
   overflow: hidden;

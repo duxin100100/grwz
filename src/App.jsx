@@ -317,6 +317,7 @@ function PagePreloader({ progress, isReady }) {
 
 function MediaLightbox({ media, onClose }) {
   const [activeTab, setActiveTab] = useState(0);
+  const [firstGalleryImageLoaded, setFirstGalleryImageLoaded] = useState(false);
 
   useEffect(() => {
     if (!media) return undefined;
@@ -333,12 +334,36 @@ function MediaLightbox({ media, onClose }) {
     };
   }, [media, onClose]);
 
+  useEffect(() => {
+    setFirstGalleryImageLoaded(false);
+  }, [media, activeTab]);
+
   if (!media) return null;
 
   const isGallery = media.type === 'gallery';
   const isTabbed = media.type === 'tabs';
   const isVideos = media.type === 'videos';
   const isVideo = media.mediaType === 'video';
+  const renderGalleryImages = (images, label) => (
+    <>
+      {images.slice(0, firstGalleryImageLoaded ? images.length : 1).map((src, i) => (
+        <img
+          key={src}
+          className={`media-lightbox__gallery-img${i === 0 && !firstGalleryImageLoaded ? ' is-loading-first' : ''}`}
+          src={src}
+          alt={`${label} ${i + 1}`}
+          loading={i === 0 ? 'eager' : 'lazy'}
+          fetchPriority={i === 0 ? 'high' : 'low'}
+          decoding={i === 0 ? 'sync' : 'async'}
+          onLoad={i === 0 ? () => setFirstGalleryImageLoaded(true) : undefined}
+          onError={i === 0 ? () => setFirstGalleryImageLoaded(true) : undefined}
+        />
+      ))}
+      {!firstGalleryImageLoaded && (
+        <div className="media-lightbox__gallery-loading">LOADING FIRST IMAGE</div>
+      )}
+    </>
+  );
 
   if (isTabbed) {
     const current = media.tabs[activeTab];
@@ -369,15 +394,7 @@ function MediaLightbox({ media, onClose }) {
             </button>
           </div>
           <div className="media-lightbox__gallery-scroll">
-            {current.images.map((src, i) => (
-              <img
-                key={src}
-                className="media-lightbox__gallery-img"
-                src={src}
-                alt={`${current.label} ${i + 1}`}
-                loading="lazy"
-              />
-            ))}
+            {renderGalleryImages(current.images, current.label)}
           </div>
         </div>
       </div>
@@ -447,14 +464,7 @@ function MediaLightbox({ media, onClose }) {
             </button>
           </div>
           <div className="media-lightbox__gallery-scroll">
-            {media.images.map((src, i) => (
-              <img
-                key={src}
-                className="media-lightbox__gallery-img"
-                src={src}
-                alt={`${media.title} ${i + 1}`}
-              />
-            ))}
+            {renderGalleryImages(media.images, media.title)}
           </div>
         </div>
       </div>
