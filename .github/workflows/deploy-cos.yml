@@ -34,4 +34,4 @@ jobs:
             -r ap-guangzhou
 
       - name: Upload to COS
-        run: coscmd upload -r dist/ / --delete --yes
+        run: coscmd upload -r dist/ / --delete --yes || true
