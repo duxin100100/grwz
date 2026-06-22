@@ -4,12 +4,22 @@ import './FlowingMenu.css';
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
 
+function RightArrow() {
+  return (
+    <svg className="fm-item__arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 12h15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function FlowingMenu({
   items = [],
   marqueeBgColor = '#b8ff20',
   marqueeTextColor = '#030506',
   speed = 5,
   onSelect,
+  onPreview,
 }) {
   const [hoverState, setHoverState] = useState(null);
   const marqueeUnits = Array.from({ length: 10 });
@@ -36,7 +46,12 @@ export default function FlowingMenu({
                 onSelect(item);
               }
             }}
-            onMouseEnter={(e) => setHoverState({ id: item.id, dir: getDir(e) })}
+            onMouseEnter={(e) => {
+              onPreview?.(item);
+              setHoverState({ id: item.id, dir: getDir(e) });
+            }}
+            onTouchStart={() => onPreview?.(item)}
+            onFocus={() => onPreview?.(item)}
             onMouseLeave={() => setHoverState(null)}
           >
             {/* ── Static row content ── */}
@@ -47,7 +62,7 @@ export default function FlowingMenu({
             </div>
             <div className="fm-item__tag">
               <span>{item.en}</span>
-              <span className="fm-item__arrow" aria-hidden="true">→</span>
+              <RightArrow />
             </div>
 
             {/* ── Marquee overlay ── */}

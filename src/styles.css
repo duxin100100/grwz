@@ -752,6 +752,19 @@ video {
   line-height: 1;
 }
 
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.28em;
+}
+
+.section-heading__arrow {
+  width: 0.78em;
+  height: 0.78em;
+  color: var(--lime);
+  flex: 0 0 auto;
+}
+
 .section-title h2 span {
   color: var(--lime);
   font-weight: 700;
@@ -995,8 +1008,8 @@ video {
 }
 
 .section-title h2 .blur-text-segment:last-child {
-  color: var(--lime);
-  font-weight: 900;
+  color: var(--text);
+  font-weight: 700;
 }
 
 .stats-row .blur-text-segment,

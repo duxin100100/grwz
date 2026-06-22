@@ -179,6 +179,48 @@ function DownRightArrow({ className = '' }) {
   );
 }
 
+function SectionHeading({ title }) {
+  return (
+    <h2 className="section-heading">
+      <BlurText as="span" text={title} delay={42} animateBy="letters" direction="top" />
+      <DownRightArrow className="section-heading__arrow" />
+    </h2>
+  );
+}
+
+const getProjectImageSources = (project) => {
+  if (project.gallery) return project.gallery;
+  if (project.tabs) return project.tabs.flatMap((tab) => tab.images || []);
+  if (project.videos) {
+    return project.videos.flatMap((item) => (item.type === 'photos' ? item.images || [] : []));
+  }
+  return [];
+};
+
+const uniqueSources = (sources) => [...new Set(sources.filter(Boolean))];
+const imagePreloadCache = new Set();
+
+function preloadImage(src, fetchPriority = 'low') {
+  if (!src || imagePreloadCache.has(src)) return Promise.resolve();
+  imagePreloadCache.add(src);
+
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.decoding = 'async';
+    image.fetchPriority = fetchPriority;
+    image.onload = resolve;
+    image.onerror = resolve;
+    image.src = src;
+  });
+}
+
+async function preloadImages(sources, fetchPriority = 'low', batchSize = 2) {
+  const queue = uniqueSources(sources).filter((src) => !imagePreloadCache.has(src));
+  for (let index = 0; index < queue.length; index += batchSize) {
+    await Promise.all(queue.slice(index, index + batchSize).map((src) => preloadImage(src, fetchPriority)));
+  }
+}
+
 function Header({ activeSection, onNavigate }) {
   return (
     <header className="site-header">
@@ -549,7 +591,7 @@ function Experience() {
     <section className="section experience" id="experience">
       <div className="shell">
         <div className="section-title">
-          <BlurText as="h2" text="WORK EXPERIENCE ↘︎" delay={42} animateBy="letters" direction="top" />
+          <SectionHeading title="WORK EXPERIENCE" />
           <BlurText as="p" text="个人经历" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="experience-grid">
@@ -651,8 +693,9 @@ function Experience() {
   );
 }
 
-function Projects({ onOpenMedia }) {
+function Projects({ onOpenMedia, onPreloadProject }) {
   const handleSelect = (item) => {
+    onPreloadProject?.(item, 'high');
     if (item.gallery) {
       onOpenMedia({ type: 'gallery', title: item.category, images: item.gallery });
     } else if (item.tabs) {
@@ -669,7 +712,7 @@ function Projects({ onOpenMedia }) {
     <section className="section projects" id="projects">
       <div className="shell">
         <div className="section-title">
-          <BlurText as="h2" text="SELECTED WORKS ↘︎" delay={42} animateBy="letters" direction="top" />
+          <SectionHeading title="SELECTED WORKS" />
           <BlurText as="p" text="作品展示" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <motion.div
@@ -684,6 +727,7 @@ function Projects({ onOpenMedia }) {
             marqueeTextColor="#030506"
             speed={18}
             onSelect={handleSelect}
+            onPreview={(item) => onPreloadProject?.(item, 'high')}
           />
         </motion.div>
       </div>
@@ -787,7 +831,7 @@ function Strengths() {
     <section className="section strengths" id="strengths">
       <div className="shell">
         <div className="section-title">
-          <BlurText as="h2" text="CORE STRENGTHS ↘︎" delay={42} animateBy="letters" direction="top" />
+          <SectionHeading title="CORE STRENGTHS" />
           <BlurText as="p" text="个人优势" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="strength-grid">
@@ -942,6 +986,10 @@ export default function App() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [heroVideoReady, setHeroVideoReady] = useState(false);
 
+  const preloadProject = useCallback((project, fetchPriority = 'low') => {
+    preloadImages(getProjectImageSources(project), fetchPriority, fetchPriority === 'high' ? 4 : 2);
+  }, []);
+
   const handleHeroVideoProgress = useCallback((percent) => {
     setLoadProgress((current) => Math.max(current, percent));
   }, []);
@@ -1017,6 +1065,33 @@ export default function App() {
     return () => window.clearInterval(timer);
   }, [heroVideoReady]);
 
+  useEffect(() => {
+    if (!heroVideoReady) return undefined;
+
+    let cancelled = false;
+    const firstImages = projects.map((project) => getProjectImageSources(project)[0]);
+    const allImages = projects.flatMap(getProjectImageSources);
+    const run = async () => {
+      await preloadImages(firstImages, 'high', 4);
+      if (!cancelled) {
+        await preloadImages(allImages, 'low', 2);
+      }
+    };
+
+    const schedule = window.requestIdleCallback
+      ? window.requestIdleCallback(() => run(), { timeout: 1800 })
+      : window.setTimeout(run, 900);
+
+    return () => {
+      cancelled = true;
+      if (window.cancelIdleCallback && typeof schedule === 'number') {
+        window.cancelIdleCallback(schedule);
+      } else {
+        window.clearTimeout(schedule);
+      }
+    };
+  }, [heroVideoReady]);
+
   return (
     <main>
       <PagePreloader progress={loadProgress} isReady={heroVideoReady} />
@@ -1035,7 +1110,7 @@ export default function App() {
       <Header activeSection={activeSection} onNavigate={scrollToSection} />
       <Hero onHeroVideoProgress={handleHeroVideoProgress} onHeroVideoReady={handleHeroVideoReady} />
       <Experience />
-      <Projects onOpenMedia={setActiveMedia} />
+      <Projects onOpenMedia={setActiveMedia} onPreloadProject={preloadProject} />
       <Strengths />
       <Contact />
       <MediaLightbox media={activeMedia} onClose={() => setActiveMedia(null)} />

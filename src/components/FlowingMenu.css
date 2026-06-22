@@ -81,10 +81,10 @@
 }
 
 .fm-item__arrow {
-  font-size: 20px;
+  width: 20px;
+  height: 20px;
   color: var(--faint);
   transition: transform 220ms ease, color 220ms ease;
-  line-height: 1;
   flex-shrink: 0;
 }
 
