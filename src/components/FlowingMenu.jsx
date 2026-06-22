@@ -12,6 +12,7 @@ export default function FlowingMenu({
   onSelect,
 }) {
   const [hoverState, setHoverState] = useState(null);
+  const marqueeUnits = Array.from({ length: 10 });
 
   const getDir = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -61,14 +62,9 @@ export default function FlowingMenu({
                   transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
                   aria-hidden="true"
                 >
-                  {/* Two identical sets → animate translateX(-50%) for seamless loop */}
                   <div className="fm-marquee__track" style={{ animationDuration: `${speed}s` }}>
-                    {[1, 2].map((setIdx) => (
-                      <span key={setIdx} className="fm-marquee__set" aria-hidden={setIdx === 2 ? 'true' : undefined}>
-                        <img className="fm-marquee__img" src={asset(`assets/${item.image}`)} alt="" />
-                        <span className="fm-marquee__text">{item.en}</span>
-                        <img className="fm-marquee__img" src={asset(`assets/${item.image}`)} alt="" />
-                        <span className="fm-marquee__text">{item.en}</span>
+                    {marqueeUnits.map((_, index) => (
+                      <span key={`${item.id}-${index}`} className="fm-marquee__unit">
                         <img className="fm-marquee__img" src={asset(`assets/${item.image}`)} alt="" />
                         <span className="fm-marquee__text">{item.en}</span>
                       </span>
