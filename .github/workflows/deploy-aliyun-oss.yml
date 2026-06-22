@@ -1,0 +1,46 @@
+name: Deploy to Aliyun OSS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: aliyun-oss
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build for root domain
+        run: npm run build
+        env:
+          VERCEL: "1"
+
+      - name: Setup Aliyun CLI
+        uses: aliyun/setup-aliyun-cli-action@v1
+
+      - name: Configure Aliyun credentials
+        run: |
+          aliyun configure set \
+            --mode AK \
+            --region cn-hongkong \
+            --access-key-id "${{ secrets.ALIYUN_ACCESS_KEY_ID }}" \
+            --access-key-secret "${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}"
+
+      - name: Sync to OSS
+        run: |
+          yes | aliyun oss sync dist/ oss://duxin-ink-portfolio-hk/ \
+            --region cn-hongkong \
+            --delete
