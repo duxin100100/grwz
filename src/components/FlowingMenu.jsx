@@ -28,10 +28,10 @@ export default function FlowingMenu({
         return (
           <a
             key={item.id}
-            href={(item.gallery || item.videos) ? undefined : item.href}
+            href={(item.gallery || item.tabs || item.videos) ? undefined : item.href}
             className="fm-item"
             onClick={(e) => {
-              if ((item.gallery || item.videos) && onSelect) {
+              if ((item.gallery || item.tabs || item.videos) && onSelect) {
                 e.preventDefault();
                 onSelect(item);
               }
