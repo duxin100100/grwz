@@ -1607,6 +1607,27 @@ video {
     font-size: 28px;
   }
 
+  .contact-section {
+    padding: 104px 0 86px;
+  }
+
+  .contact-layout {
+    gap: 28px;
+    align-items: start;
+  }
+
+  .contact-copy {
+    min-height: 0;
+  }
+
+  .contact-brand {
+    display: none;
+  }
+
+  .contact-card {
+    min-height: 0;
+  }
+
   .about-panel h3 {
     font-size: 30px;
   }
