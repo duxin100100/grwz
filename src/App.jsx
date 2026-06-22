@@ -549,8 +549,8 @@ function Experience() {
                 <strong>UI Designer</strong>
               </div>
               <div>
-                <small>服务方向</small>
-                <strong>B端 / C端 / 运营 / 品牌</strong>
+                <small>能力覆盖</small>
+                <strong>从产品体验到品牌视觉，从创意动效到网站落地</strong>
               </div>
               <div>
                 <small>手机</small>
