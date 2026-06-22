@@ -221,7 +221,7 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
       onHeroVideoProgress(percent);
     }
 
-    if (percent >= 100 || video?.readyState >= 4) {
+    if (percent >= 100 || video?.readyState >= 2) {
       onHeroVideoProgress(100);
       onHeroVideoReady();
     }
@@ -230,7 +230,7 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
   useEffect(() => {
     const fallback = window.setTimeout(() => {
       const video = videoRef.current;
-      if (video?.readyState >= 3) {
+      if (video?.readyState >= 1) {
         onHeroVideoProgress(100);
         onHeroVideoReady();
       }
@@ -252,6 +252,7 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
         playsInline
         aria-hidden="true"
         onLoadedMetadata={syncVideoProgress}
+        onLoadedData={syncVideoProgress}
         onProgress={syncVideoProgress}
         onCanPlay={syncVideoProgress}
         onCanPlayThrough={syncVideoProgress}
