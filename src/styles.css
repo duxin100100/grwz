@@ -1451,6 +1451,20 @@ video {
   display: block;
 }
 
+.contact-heading-line {
+  display: flex !important;
+  align-items: flex-end;
+  gap: 0.18em;
+}
+
+.contact-heading-arrow {
+  width: 0.72em;
+  height: 0.72em;
+  margin-bottom: 0.1em;
+  color: var(--lime);
+  flex: 0 0 auto;
+}
+
 .contact-brand {
   margin-top: auto;
   transform: none;

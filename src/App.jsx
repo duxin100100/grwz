@@ -170,6 +170,15 @@ const strengths = [
   }
 ];
 
+function DownRightArrow({ className = '' }) {
+  return (
+    <svg className={className} viewBox="0 0 36 36" fill="none" aria-hidden="true">
+      <path d="M9 9h18v18" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 27 27 9" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function Header({ activeSection, onNavigate }) {
   return (
     <header className="site-header">
@@ -540,7 +549,7 @@ function Experience() {
     <section className="section experience" id="experience">
       <div className="shell">
         <div className="section-title">
-          <BlurText as="h2" text="WORK EXPERIENCE ↘" delay={42} animateBy="letters" direction="top" />
+          <BlurText as="h2" text="WORK EXPERIENCE ↘︎" delay={42} animateBy="letters" direction="top" />
           <BlurText as="p" text="个人经历" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="experience-grid">
@@ -660,7 +669,7 @@ function Projects({ onOpenMedia }) {
     <section className="section projects" id="projects">
       <div className="shell">
         <div className="section-title">
-          <BlurText as="h2" text="SELECTED WORKS ↘" delay={42} animateBy="letters" direction="top" />
+          <BlurText as="h2" text="SELECTED WORKS ↘︎" delay={42} animateBy="letters" direction="top" />
           <BlurText as="p" text="作品展示" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <motion.div
@@ -778,7 +787,7 @@ function Strengths() {
     <section className="section strengths" id="strengths">
       <div className="shell">
         <div className="section-title">
-          <BlurText as="h2" text="CORE STRENGTHS ↘" delay={42} animateBy="letters" direction="top" />
+          <BlurText as="h2" text="CORE STRENGTHS ↘︎" delay={42} animateBy="letters" direction="top" />
           <BlurText as="p" text="个人优势" delay={90} animateBy="letters" direction="bottom" />
         </div>
         <div className="strength-grid">
@@ -821,7 +830,10 @@ function Contact() {
           <h2>
             <span>{"LET'S BUILD"}</span>
             <span>BETTER VISUAL</span>
-            <span>SYSTEMS ↘</span>
+            <span className="contact-heading-line">
+              SYSTEMS
+              <DownRightArrow className="contact-heading-arrow" />
+            </span>
           </h2>
           <a className="brand-pill contact-brand" href="#top">
             <img className="brand-logo" src={asset('assets/logo-black.svg')} alt="" aria-hidden="true" />
