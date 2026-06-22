@@ -229,12 +229,9 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
 
   useEffect(() => {
     const fallback = window.setTimeout(() => {
-      const video = videoRef.current;
-      if (video?.readyState >= 1) {
-        onHeroVideoProgress(100);
-        onHeroVideoReady();
-      }
-    }, 9000);
+      onHeroVideoProgress(100);
+      onHeroVideoReady();
+    }, 4000);
 
     return () => window.clearTimeout(fallback);
   }, [onHeroVideoProgress, onHeroVideoReady]);
