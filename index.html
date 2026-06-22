@@ -8,8 +8,65 @@
       content="UUU，####，####。"
     />
     <title>UUU | Portfolio</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #030506;
+      }
+
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        color: #b8ff20;
+        font: 700 11px/1 Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+        letter-spacing: 0.18em;
+        background:
+          radial-gradient(circle at 30% 18%, rgba(184, 255, 32, 0.14), transparent 34rem),
+          radial-gradient(circle at 74% 72%, rgba(0, 109, 100, 0.22), transparent 32rem),
+          #030506;
+      }
+
+      #initial-loader .initial-loader__inner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(260px, 68vw);
+        transform: translate(-50%, -50%);
+      }
+
+      #initial-loader img {
+        display: block;
+        width: 100%;
+        height: auto;
+        opacity: 0.16;
+        filter: grayscale(1);
+      }
+
+      #initial-loader .initial-loader__meta {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 28px;
+        color: rgba(246, 248, 244, 0.62);
+      }
+
+      #initial-loader .initial-loader__bar {
+        height: 2px;
+        margin-top: 12px;
+        border-radius: 999px;
+        background: rgba(246, 248, 244, 0.12);
+      }
+    </style>
   </head>
   <body>
+    <div id="initial-loader" aria-hidden="true">
+      <div class="initial-loader__inner">
+        <img src="%BASE_URL%assets/logo-lime.svg" alt="" />
+        <div class="initial-loader__meta"><span>LOADING</span><span>0%</span></div>
+        <div class="initial-loader__bar"></div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

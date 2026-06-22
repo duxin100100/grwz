@@ -4,24 +4,18 @@ import { motion } from 'motion/react';
 import BlurText from './components/BlurText';
 import BorderGlow from './components/BorderGlow';
 import FlowingMenu from './components/FlowingMenu';
-import CircularGallery from './components/CircularGallery';
 import ProfileCard from './components/ProfileCard';
 import SpotlightCard from './components/SpotlightCard';
 import SplashCursor from './components/SplashCursor';
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
+const HERO_VIDEO_SRC = asset('assets/hero-video.webm');
 
 const navItems = [
   { label: '工作经历', href: '#experience' },
   { label: '精选作品', href: '#projects' },
   { label: '个人优势', href: '#strengths' }
 ];
-
-const heroWorks = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
-  title: `PHOTO-0${n}`,
-  label: 'UI Designer',
-  image: asset(`assets/个人照片/${String(n).padStart(2, '0')}.jpg`)
-}));
 
 const stats = [
   { value: '8+', label: '设计经验' },
@@ -184,27 +178,64 @@ function Header({ activeSection, onNavigate }) {
   );
 }
 
-function Hero({ onOpenMedia }) {
-  const galleryItems = heroWorks.map((work) => ({
-    image: work.image,
-    text: work.title,
-    title: work.title,
-    label: work.label,
-    mediaType: work.mediaType || 'image',
-    mediaSrc: work.mediaSrc || work.image,
-    poster: work.poster || work.image
-  }));
+function getBufferedPercent(video) {
+  if (!video?.duration || !Number.isFinite(video.duration) || video.duration <= 0) {
+    return 0;
+  }
+
+  let bufferedEnd = 0;
+  for (let index = 0; index < video.buffered.length; index += 1) {
+    bufferedEnd = Math.max(bufferedEnd, video.buffered.end(index));
+  }
+
+  return Math.min(100, Math.round((bufferedEnd / video.duration) * 100));
+}
+
+function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
+  const videoRef = useRef(null);
+
+  const syncVideoProgress = useCallback(() => {
+    const video = videoRef.current;
+    const percent = getBufferedPercent(video);
+
+    if (percent > 0) {
+      onHeroVideoProgress(percent);
+    }
+
+    if (percent >= 100 || video?.readyState >= 4) {
+      onHeroVideoProgress(100);
+      onHeroVideoReady();
+    }
+  }, [onHeroVideoProgress, onHeroVideoReady]);
+
+  useEffect(() => {
+    const fallback = window.setTimeout(() => {
+      const video = videoRef.current;
+      if (video?.readyState >= 3) {
+        onHeroVideoProgress(100);
+        onHeroVideoReady();
+      }
+    }, 9000);
+
+    return () => window.clearTimeout(fallback);
+  }, [onHeroVideoProgress, onHeroVideoReady]);
 
   return (
     <section className="hero" id="top">
       <video
+        ref={videoRef}
         className="hero-video-placeholder"
-        src={asset('assets/hero-video.webm')}
+        src={HERO_VIDEO_SRC}
+        preload="auto"
         autoPlay
         loop
         muted
         playsInline
         aria-hidden="true"
+        onLoadedMetadata={syncVideoProgress}
+        onProgress={syncVideoProgress}
+        onCanPlay={syncVideoProgress}
+        onCanPlayThrough={syncVideoProgress}
       />
       <div className="hero-scrim" />
       <div className="hero-content shell">
@@ -238,6 +269,30 @@ function Hero({ onOpenMedia }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function PagePreloader({ progress, isReady }) {
+  const displayProgress = Math.min(100, Math.max(0, Math.round(progress)));
+
+  return (
+    <div className={`page-preloader${isReady ? ' is-hiding' : ''}`} aria-hidden={isReady}>
+      <div className="page-preloader__inner">
+        <div className="page-preloader__logo" aria-hidden="true">
+          <img className="page-preloader__logo-base" src={asset('assets/logo-lime.svg')} alt="" />
+          <div className="page-preloader__logo-fill" style={{ width: `${displayProgress}%` }}>
+            <img src={asset('assets/logo-lime.svg')} alt="" />
+          </div>
+        </div>
+        <div className="page-preloader__meta">
+          <span>LOADING</span>
+          <span>{displayProgress}%</span>
+        </div>
+        <div className="page-preloader__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={displayProgress}>
+          <span style={{ transform: `scaleX(${displayProgress / 100})` }} />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -390,7 +445,7 @@ function Experience() {
                 name="杜鑫"
                 title="UI Designer"
                 handle="dx.design"
-                avatarUrl={asset('assets/个人ip.png')}
+                avatarUrl={asset('assets/个人ip.jpg')}
                 status="8 YEARS / SaaS / B端 / C端"
                 contactText="Contact"
                 showUserInfo
@@ -731,7 +786,7 @@ function MusicPlayer() {
 
   return (
     <div className="music-player">
-      <audio ref={audioRef} src={asset('assets/music.mp3')} loop />
+      <audio ref={audioRef} src={asset('assets/music.m4a')} loop />
       <button className="music-btn" onClick={toggle} aria-label={playing ? '暂停音乐' : '播放音乐'}>
         {playing ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -755,6 +810,17 @@ function MusicPlayer() {
 export default function App() {
   const [activeMedia, setActiveMedia] = useState(null);
   const [activeSection, setActiveSection] = useState('');
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [heroVideoReady, setHeroVideoReady] = useState(false);
+
+  const handleHeroVideoProgress = useCallback((percent) => {
+    setLoadProgress((current) => Math.max(current, percent));
+  }, []);
+
+  const handleHeroVideoReady = useCallback(() => {
+    setLoadProgress(100);
+    window.setTimeout(() => setHeroVideoReady(true), 240);
+  }, []);
 
   const scrollToSection = useCallback((event, sectionId) => {
     event.preventDefault();
@@ -799,8 +865,32 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('is-preloading', !heroVideoReady);
+    document.getElementById('initial-loader')?.remove();
+
+    return () => {
+      document.documentElement.classList.remove('is-preloading');
+    };
+  }, [heroVideoReady]);
+
+  useEffect(() => {
+    if (heroVideoReady) return undefined;
+
+    const timer = window.setInterval(() => {
+      setLoadProgress((current) => {
+        if (current >= 92) return current;
+        const step = current < 38 ? 6 : current < 72 ? 3 : 1;
+        return Math.min(92, current + step);
+      });
+    }, 220);
+
+    return () => window.clearInterval(timer);
+  }, [heroVideoReady]);
+
   return (
     <main>
+      <PagePreloader progress={loadProgress} isReady={heroVideoReady} />
       <MusicPlayer />
       <SplashCursor
         SIM_RESOLUTION={96}
@@ -814,7 +904,7 @@ export default function App() {
         COLOR="#b8ff20"
       />
       <Header activeSection={activeSection} onNavigate={scrollToSection} />
-      <Hero onOpenMedia={setActiveMedia} />
+      <Hero onHeroVideoProgress={handleHeroVideoProgress} onHeroVideoReady={handleHeroVideoReady} />
       <Experience />
       <Projects onOpenMedia={setActiveMedia} />
       <Strengths />
