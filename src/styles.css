@@ -1276,8 +1276,9 @@ video {
   transition: opacity 260ms ease, transform 260ms ease;
 }
 
-.strength-card:hover .strength-card__icon {
-  opacity: 0.55;
+.strength-card:hover .strength-card__icon,
+.strength-card:focus-within .strength-card__icon {
+  opacity: 0;
   transform: translate3d(-6px, -6px, 0) rotate(6deg) scale(1.08);
 }
 

@@ -666,7 +666,7 @@ function Experience() {
           >
             <span className="lime-label">ABOUT ME</span>
             <h3>你好，我叫杜鑫</h3>
-            <p>擅长从产品目标出发，把复杂业务转译成有温度、可落地的界面，从信息架构、交互流程到视觉系统，一并交付。</p>
+            <p>一个能把 PM 的&quot;大概这样&quot;翻译成可落地上线的设计师。</p>
             <div className="info-grid">
               <div>
                 <small>当前身份</small>
