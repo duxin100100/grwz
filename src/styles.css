@@ -716,9 +716,7 @@ video {
 }
 
 .progressive-gallery-media__preview {
-  filter: blur(8px);
   opacity: 1;
-  transform: scale(1.012);
   transition: opacity 240ms ease;
 }
 

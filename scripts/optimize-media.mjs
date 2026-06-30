@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdir, readdir, stat, unlink } from 'node:fs/promises';
+import { mkdir, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -8,8 +8,6 @@ const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const publicAssets = path.join(root, 'public', 'assets');
 const thumbRoot = path.join(publicAssets, 'thumbs');
-const videoRoot = path.join(publicAssets, 'videos');
-const ffmpegPath = '/Users/dx/Library/Application Support/Adobe/CEP/extensions/GifGun2/.bin/ffmpeg';
 const mediaDirs = [
   'C端作品',
   'B端作品',
@@ -50,43 +48,12 @@ async function generateThumbnail(source) {
   ]);
 }
 
-async function generateVideo(source) {
-  if (path.extname(source).toLowerCase() !== '.gif') return;
-  const rel = path.relative(publicAssets, source);
-  const parsed = path.parse(rel);
-  const output = path.join(videoRoot, parsed.dir, `${parsed.name}.mp4`);
-  await mkdir(path.dirname(output), { recursive: true });
-  await execFileAsync('chmod', ['u+x', ffmpegPath]).catch(() => {});
-  await execFileAsync(ffmpegPath, [
-    '-y',
-    '-hide_banner',
-    '-loglevel', 'error',
-    '-i', source,
-    '-movflags', '+faststart',
-    '-pix_fmt', 'yuv420p',
-    '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
-    output,
-  ]);
-  const [sourceStat, outputStat] = await Promise.all([stat(source), stat(output)]);
-  if (outputStat.size >= sourceStat.size) {
-    await unlink(output);
-    return false;
-  }
-  return true;
-}
-
 const files = (await Promise.all(mediaDirs.map((dir) => walk(path.join(publicAssets, dir))))).flat();
 let thumbs = 0;
-let videos = 0;
 
 for (const file of files) {
   await generateThumbnail(file);
   thumbs += 1;
-  if (path.extname(file).toLowerCase() === '.gif') {
-    if (await generateVideo(file)) {
-      videos += 1;
-    }
-  }
 }
 
-console.log(`Generated ${thumbs} thumbnails and ${videos} smaller mp4 videos.`);
+console.log(`Generated ${thumbs} thumbnails.`);

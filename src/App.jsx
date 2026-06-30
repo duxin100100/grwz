@@ -14,18 +14,6 @@ const HERO_VIDEO_MP4_SRC = asset('assets/hero-video.mp4');
 const HERO_VIDEO_WEBM_SRC = asset('assets/hero-video.webm');
 
 const replaceExtension = (path, extension) => path.replace(/\.[^/.?#]+(?=([?#].*)?$)/, extension);
-const optimizedGifVideoPaths = new Set([
-  'C端作品/5.gif',
-  'C端作品/6.gif',
-  'C端作品/7.gif',
-  'C端作品/8.gif',
-  '暑期活动/10.gif',
-  '暑期活动/15.gif',
-  '暑期活动/21.gif',
-  '暑期活动/22.gif',
-  '超漫俱乐部/20.gif',
-  '超漫俱乐部/22.gif',
-]);
 
 function getAssetRelativePath(src) {
   const marker = 'assets/';
@@ -36,12 +24,6 @@ function getAssetRelativePath(src) {
 function getThumbnailSrc(src) {
   const relativePath = getAssetRelativePath(src);
   return relativePath ? asset(`assets/thumbs/${replaceExtension(relativePath, '.jpg')}`) : src;
-}
-
-function getOptimizedVideoSrc(src) {
-  const relativePath = getAssetRelativePath(src);
-  if (!relativePath || !optimizedGifVideoPaths.has(relativePath)) return '';
-  return asset(`assets/videos/${replaceExtension(relativePath, '.mp4')}`);
 }
 
 const navItems = [
@@ -501,40 +483,10 @@ function PagePreloader({ progress, isReady }) {
 function ProgressiveGalleryMedia({ src, alt, priority = false, onPreviewReady }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const thumbnailSrc = getThumbnailSrc(src);
-  const videoSrc = getOptimizedVideoSrc(src);
 
   const handlePreviewReady = () => {
     onPreviewReady?.();
   };
-
-  if (videoSrc) {
-    return (
-      <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
-        <img
-          className="progressive-gallery-media__preview"
-          src={thumbnailSrc}
-          alt=""
-          loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'low'}
-          decoding="async"
-          onLoad={handlePreviewReady}
-          onError={handlePreviewReady}
-        />
-        <video
-          className="progressive-gallery-media__full"
-          src={videoSrc}
-          poster={thumbnailSrc}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload={priority ? 'auto' : 'metadata'}
-          aria-label={alt}
-          onLoadedData={() => setIsLoaded(true)}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
