@@ -1083,9 +1083,9 @@ export default function App() {
 
   const preloadProject = useCallback((project, fetchPriority = 'low') => {
     const sources = getProjectImageSources(project);
-    preloadImages(sources.map(getThumbnailSrc), fetchPriority, fetchPriority === 'high' ? 4 : 2);
+    preloadImages(sources.slice(0, 1), fetchPriority, 1);
     if (fetchPriority === 'high') {
-      preloadImages(sources.slice(0, 2), 'low', 2);
+      preloadImages(sources.slice(1, 3), 'low', 2);
     }
   }, []);
 
@@ -1167,8 +1167,7 @@ export default function App() {
   useEffect(() => {
     if (!heroVideoReady) return undefined;
 
-    let cancelled = false;
-    const firstImages = projects.map((project) => getThumbnailSrc(getProjectImageSources(project)[0]));
+    const firstImages = projects.map((project) => getProjectImageSources(project)[0]).filter(Boolean);
     const run = async () => {
       await preloadImages(firstImages, 'high', 4);
     };
@@ -1178,7 +1177,6 @@ export default function App() {
       : window.setTimeout(run, 900);
 
     return () => {
-      cancelled = true;
       if (window.cancelIdleCallback && typeof schedule === 'number') {
         window.cancelIdleCallback(schedule);
       } else {
