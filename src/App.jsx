@@ -479,7 +479,7 @@ function ProgressiveGalleryMedia({ src, alt, priority = false, onPreviewReady })
     <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
       <div className="progressive-gallery-media__loader" aria-hidden="true">
         <img src={asset('assets/logo-lime.svg')} alt="" />
-        <span>LOADING</span>
+        <span className="progressive-gallery-media__loader-text">图片加载中<span /></span>
       </div>
       <img
         className="progressive-gallery-media__full"
@@ -535,9 +535,6 @@ function MediaLightbox({ media, onClose }) {
           onPreviewReady={i === 0 ? () => setFirstGalleryImageLoaded(true) : undefined}
         />
       ))}
-      {!firstGalleryImageLoaded && (
-        <div className="media-lightbox__gallery-loading">LOADING FIRST IMAGE</div>
-      )}
     </>
   );
 
