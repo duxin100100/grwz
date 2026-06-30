@@ -140,17 +140,31 @@
   flex-shrink: 0;
 }
 
-/* Capsule / pill shape — matches reference */
-.fm-marquee__img {
+.fm-marquee__media {
+  display: grid;
   height: 62px;
   width: 130px;
   min-width: 130px;
-  object-fit: cover;
+  place-items: center;
+  overflow: hidden;
   border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(5, 12, 8, 0.82), rgba(37, 73, 30, 0.72)),
+    #102010;
+  box-shadow: inset 0 0 0 1px rgba(3, 5, 6, 0.18);
   flex-shrink: 0;
-  opacity: 0.9;
+  contain: paint;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+}
+
+.fm-marquee__img {
+  width: 130px;
+  height: 62px;
+  object-fit: contain;
+  border-radius: 999px;
+  opacity: 0.92;
+  transform: scale(1.35);
 }
 
 /* ── Responsive ── */
@@ -171,7 +185,15 @@
     width: 210px;
     gap: 24px;
   }
-  .fm-marquee__img { height: 48px; width: 96px; min-width: 96px; }
+  .fm-marquee__media {
+    height: 48px;
+    width: 96px;
+    min-width: 96px;
+  }
+  .fm-marquee__img {
+    height: 48px;
+    width: 96px;
+  }
 
   @keyframes fm-scroll {
     from { transform: translate3d(0, 0, 0); }

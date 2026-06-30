@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import './FlowingMenu.css';
 
@@ -23,6 +23,16 @@ export default function FlowingMenu({
 }) {
   const [hoverState, setHoverState] = useState(null);
   const marqueeUnits = Array.from({ length: 10 });
+
+  useEffect(() => {
+    items.forEach((item) => {
+      if (!item.image) return;
+      const image = new Image();
+      image.decoding = 'async';
+      image.fetchPriority = 'high';
+      image.src = asset(`assets/${item.image}`);
+    });
+  }, [items]);
 
   const getDir = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -80,7 +90,9 @@ export default function FlowingMenu({
                   <div className="fm-marquee__track" style={{ animationDuration: `${speed}s` }}>
                     {marqueeUnits.map((_, index) => (
                       <span key={`${item.id}-${index}`} className="fm-marquee__unit">
-                        <img className="fm-marquee__img" src={asset(`assets/${item.image}`)} alt="" />
+                        <span className="fm-marquee__media">
+                          <img className="fm-marquee__img" src={asset(`assets/${item.image}`)} alt="" />
+                        </span>
                         <span className="fm-marquee__text">{item.en}</span>
                       </span>
                     ))}
