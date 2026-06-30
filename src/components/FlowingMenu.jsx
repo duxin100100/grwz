@@ -20,11 +20,13 @@ export default function FlowingMenu({
   speed = 5,
   onSelect,
   onPreview,
+  lowPower = false,
 }) {
   const [hoverState, setHoverState] = useState(null);
-  const marqueeUnits = Array.from({ length: 10 });
+  const marqueeUnits = Array.from({ length: lowPower ? 5 : 10 });
 
   useEffect(() => {
+    if (lowPower) return;
     items.forEach((item) => {
       if (!item.image) return;
       const image = new Image();
@@ -32,7 +34,7 @@ export default function FlowingMenu({
       image.fetchPriority = 'high';
       image.src = asset(`assets/${item.image}`);
     });
-  }, [items]);
+  }, [items, lowPower]);
 
   const getDir = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();

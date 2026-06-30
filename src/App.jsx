@@ -256,6 +256,7 @@ async function preloadImages(sources, fetchPriority = 'low', batchSize = 2) {
 
 function shouldUseHeavyEffects() {
   if (typeof window === 'undefined') return false;
+  if (shouldUsePresentationMode()) return false;
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches;
   const narrowScreen = window.matchMedia?.('(max-width: 900px)').matches;
@@ -264,6 +265,15 @@ function shouldUseHeavyEffects() {
   const cores = navigator.hardwareConcurrency || 8;
 
   return !reducedMotion && !coarsePointer && !narrowScreen && !saveData && memory >= 6 && cores >= 6;
+}
+
+function shouldUsePresentationMode() {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return ['present', 'presentation', 'lite'].some((key) => {
+    const value = params.get(key);
+    return value === '1' || value === 'true' || value === 'yes';
+  });
 }
 
 function shouldAutoStartAudio() {
@@ -322,12 +332,17 @@ function getBufferedPercent(video) {
   return Math.min(100, Math.round((bufferedEnd / video.duration) * 100));
 }
 
-function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
+function Hero({ onHeroVideoProgress, onHeroVideoReady, presentationMode = false }) {
   const videoRef = useRef(null);
 
   const playHeroVideo = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    if (presentationMode) {
+      video.pause?.();
+      return;
+    }
 
     video.muted = true;
     video.defaultMuted = true;
@@ -336,10 +351,17 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
     video.play?.().catch(() => {});
-  }, []);
+  }, [presentationMode]);
 
   const syncVideoProgress = useCallback(() => {
     const video = videoRef.current;
+    if (presentationMode) {
+      onHeroVideoProgress(100);
+      onHeroVideoReady();
+      video?.pause?.();
+      return;
+    }
+
     const percent = getBufferedPercent(video);
 
     if (percent > 0) {
@@ -351,9 +373,10 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
       onHeroVideoReady();
       playHeroVideo();
     }
-  }, [onHeroVideoProgress, onHeroVideoReady, playHeroVideo]);
+  }, [onHeroVideoProgress, onHeroVideoReady, playHeroVideo, presentationMode]);
 
   useEffect(() => {
+    if (presentationMode) return undefined;
     playHeroVideo();
 
     const handleUserGesture = () => playHeroVideo();
@@ -372,26 +395,26 @@ function Hero({ onHeroVideoProgress, onHeroVideoReady }) {
       document.removeEventListener('touchstart', handleUserGesture);
       document.removeEventListener('click', handleUserGesture);
     };
-  }, [playHeroVideo]);
+  }, [playHeroVideo, presentationMode]);
 
   useEffect(() => {
     const fallback = window.setTimeout(() => {
       onHeroVideoProgress(100);
       onHeroVideoReady();
       playHeroVideo();
-    }, 4000);
+    }, presentationMode ? 700 : 4000);
 
     return () => window.clearTimeout(fallback);
-  }, [onHeroVideoProgress, onHeroVideoReady, playHeroVideo]);
+  }, [onHeroVideoProgress, onHeroVideoReady, playHeroVideo, presentationMode]);
 
   return (
     <section className="hero" id="top">
       <video
         ref={videoRef}
         className="hero-video-placeholder"
-        preload="auto"
-        autoPlay
-        loop
+        preload={presentationMode ? 'metadata' : 'auto'}
+        autoPlay={!presentationMode}
+        loop={!presentationMode}
         muted
         defaultMuted
         playsInline
@@ -782,7 +805,7 @@ function Experience() {
   );
 }
 
-function Projects({ onOpenMedia, onPreloadProject }) {
+function Projects({ onOpenMedia, onPreloadProject, presentationMode = false }) {
   const handleSelect = (item) => {
     onPreloadProject?.(item, 'high');
     if (item.gallery) {
@@ -817,6 +840,7 @@ function Projects({ onOpenMedia, onPreloadProject }) {
             speed={18}
             onSelect={handleSelect}
             onPreview={(item) => onPreloadProject?.(item, 'high')}
+            lowPower={presentationMode}
           />
         </motion.div>
       </div>
@@ -1077,14 +1101,16 @@ export default function App() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [heroVideoReady, setHeroVideoReady] = useState(false);
   const [enableHeavyEffects, setEnableHeavyEffects] = useState(false);
+  const [presentationMode] = useState(() => shouldUsePresentationMode());
 
   const preloadProject = useCallback((project, fetchPriority = 'low') => {
+    if (presentationMode) return;
     const sources = getProjectImageSources(project);
     preloadImages(sources.slice(0, 1), fetchPriority, 1);
     if (fetchPriority === 'high') {
       preloadImages(sources.slice(1, 3), 'low', 2);
     }
-  }, []);
+  }, [presentationMode]);
 
   const handleHeroVideoProgress = useCallback((percent) => {
     setLoadProgress((current) => Math.max(current, percent));
@@ -1140,12 +1166,14 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('is-preloading', !heroVideoReady);
+    document.documentElement.classList.toggle('is-presentation-mode', presentationMode);
     document.getElementById('initial-loader')?.remove();
 
     return () => {
       document.documentElement.classList.remove('is-preloading');
+      document.documentElement.classList.remove('is-presentation-mode');
     };
-  }, [heroVideoReady]);
+  }, [heroVideoReady, presentationMode]);
 
   useEffect(() => {
     if (heroVideoReady) return undefined;
@@ -1162,7 +1190,7 @@ export default function App() {
   }, [heroVideoReady]);
 
   useEffect(() => {
-    if (!heroVideoReady) return undefined;
+    if (!heroVideoReady || presentationMode) return undefined;
 
     const firstImages = projects.map((project) => getProjectImageSources(project)[0]).filter(Boolean);
     const run = async () => {
@@ -1180,16 +1208,16 @@ export default function App() {
         window.clearTimeout(schedule);
       }
     };
-  }, [heroVideoReady]);
+  }, [heroVideoReady, presentationMode]);
 
   useEffect(() => {
-    setEnableHeavyEffects(shouldUseHeavyEffects());
-  }, []);
+    setEnableHeavyEffects(!presentationMode && shouldUseHeavyEffects());
+  }, [presentationMode]);
 
   return (
     <main>
       <PagePreloader progress={loadProgress} isReady={heroVideoReady} />
-      <MusicPlayer />
+      {!presentationMode && <MusicPlayer />}
       {enableHeavyEffects && (
         <Suspense fallback={null}>
           <SplashCursor
@@ -1206,9 +1234,17 @@ export default function App() {
         </Suspense>
       )}
       <Header activeSection={activeSection} onNavigate={scrollToSection} />
-      <Hero onHeroVideoProgress={handleHeroVideoProgress} onHeroVideoReady={handleHeroVideoReady} />
+      <Hero
+        onHeroVideoProgress={handleHeroVideoProgress}
+        onHeroVideoReady={handleHeroVideoReady}
+        presentationMode={presentationMode}
+      />
       <Experience />
-      <Projects onOpenMedia={setActiveMedia} onPreloadProject={preloadProject} />
+      <Projects
+        onOpenMedia={setActiveMedia}
+        onPreloadProject={preloadProject}
+        presentationMode={presentationMode}
+      />
       <Strengths />
       <Contact />
       <MediaLightbox media={activeMedia} onClose={() => setActiveMedia(null)} />

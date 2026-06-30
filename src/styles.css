@@ -1833,3 +1833,38 @@ video {
     transform: none !important;
   }
 }
+
+html.is-presentation-mode {
+  scroll-behavior: auto;
+}
+
+html.is-presentation-mode body {
+  background-attachment: scroll;
+}
+
+html.is-presentation-mode *,
+html.is-presentation-mode *::before,
+html.is-presentation-mode *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.001ms !important;
+}
+
+html.is-presentation-mode .blur-text-segment,
+html.is-presentation-mode .section-heading__arrow-wrap {
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html.is-presentation-mode .fm-marquee__track,
+html.is-presentation-mode .hero-avail-dot,
+html.is-presentation-mode .hero-scroll-arrow,
+html.is-presentation-mode .strength-card:hover .tag-stack span {
+  animation: none !important;
+}
+
+html.is-presentation-mode .hero-video-placeholder {
+  opacity: 0.82;
+}
