@@ -13,6 +13,37 @@ const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
 const HERO_VIDEO_MP4_SRC = asset('assets/hero-video.mp4');
 const HERO_VIDEO_WEBM_SRC = asset('assets/hero-video.webm');
 
+const replaceExtension = (path, extension) => path.replace(/\.[^/.?#]+(?=([?#].*)?$)/, extension);
+const optimizedGifVideoPaths = new Set([
+  'C端作品/5.gif',
+  'C端作品/6.gif',
+  'C端作品/7.gif',
+  'C端作品/8.gif',
+  '暑期活动/10.gif',
+  '暑期活动/15.gif',
+  '暑期活动/21.gif',
+  '暑期活动/22.gif',
+  '超漫俱乐部/20.gif',
+  '超漫俱乐部/22.gif',
+]);
+
+function getAssetRelativePath(src) {
+  const marker = 'assets/';
+  const index = src.indexOf(marker);
+  return index >= 0 ? src.slice(index + marker.length) : '';
+}
+
+function getThumbnailSrc(src) {
+  const relativePath = getAssetRelativePath(src);
+  return relativePath ? asset(`assets/thumbs/${replaceExtension(relativePath, '.jpg')}`) : src;
+}
+
+function getOptimizedVideoSrc(src) {
+  const relativePath = getAssetRelativePath(src);
+  if (!relativePath || !optimizedGifVideoPaths.has(relativePath)) return '';
+  return asset(`assets/videos/${replaceExtension(relativePath, '.mp4')}`);
+}
+
 const navItems = [
   { label: '工作经历', href: '#experience' },
   { label: '精选作品', href: '#projects' },
@@ -467,6 +498,69 @@ function PagePreloader({ progress, isReady }) {
   );
 }
 
+function ProgressiveGalleryMedia({ src, alt, priority = false, onPreviewReady }) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const thumbnailSrc = getThumbnailSrc(src);
+  const videoSrc = getOptimizedVideoSrc(src);
+
+  const handlePreviewReady = () => {
+    onPreviewReady?.();
+  };
+
+  if (videoSrc) {
+    return (
+      <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
+        <img
+          className="progressive-gallery-media__preview"
+          src={thumbnailSrc}
+          alt=""
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'low'}
+          decoding="async"
+          onLoad={handlePreviewReady}
+          onError={handlePreviewReady}
+        />
+        <video
+          className="progressive-gallery-media__full"
+          src={videoSrc}
+          poster={thumbnailSrc}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload={priority ? 'auto' : 'metadata'}
+          aria-label={alt}
+          onLoadedData={() => setIsLoaded(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
+      <img
+        className="progressive-gallery-media__preview"
+        src={thumbnailSrc}
+        alt=""
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'low'}
+        decoding="async"
+        onLoad={handlePreviewReady}
+        onError={handlePreviewReady}
+      />
+      <img
+        className="progressive-gallery-media__full"
+        src={src}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'low'}
+        decoding={priority ? 'sync' : 'async'}
+        onLoad={() => setIsLoaded(true)}
+      />
+    </div>
+  );
+}
+
 function MediaLightbox({ media, onClose }) {
   const [activeTab, setActiveTab] = useState(0);
   const [firstGalleryImageLoaded, setFirstGalleryImageLoaded] = useState(false);
@@ -499,16 +593,12 @@ function MediaLightbox({ media, onClose }) {
   const renderGalleryImages = (images, label) => (
     <>
       {images.slice(0, firstGalleryImageLoaded ? images.length : 1).map((src, i) => (
-        <img
+        <ProgressiveGalleryMedia
           key={src}
-          className={`media-lightbox__gallery-img${i === 0 && !firstGalleryImageLoaded ? ' is-loading-first' : ''}`}
           src={src}
           alt={`${label} ${i + 1}`}
-          loading={i === 0 ? 'eager' : 'lazy'}
-          fetchPriority={i === 0 ? 'high' : 'low'}
-          decoding={i === 0 ? 'sync' : 'async'}
-          onLoad={i === 0 ? () => setFirstGalleryImageLoaded(true) : undefined}
-          onError={i === 0 ? () => setFirstGalleryImageLoaded(true) : undefined}
+          priority={i === 0}
+          onPreviewReady={i === 0 ? () => setFirstGalleryImageLoaded(true) : undefined}
         />
       ))}
       {!firstGalleryImageLoaded && (
@@ -580,14 +670,11 @@ function MediaLightbox({ media, onClose }) {
             {current.type === 'photos' ? (
               <div className="video-lightbox-photos">
                 {current.images.map((src, i) => (
-                  <img
+                  <ProgressiveGalleryMedia
                     key={src}
                     src={src}
                     alt={`照片 ${i + 1}`}
-                    className="video-lightbox-photo"
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={i === 0 ? 'high' : 'low'}
-                    decoding="async"
+                    priority={i === 0}
                   />
                 ))}
               </div>
@@ -1061,7 +1148,11 @@ export default function App() {
   const [enableHeavyEffects, setEnableHeavyEffects] = useState(false);
 
   const preloadProject = useCallback((project, fetchPriority = 'low') => {
-    preloadImages(getProjectImageSources(project), fetchPriority, fetchPriority === 'high' ? 4 : 2);
+    const sources = getProjectImageSources(project);
+    preloadImages(sources.map(getThumbnailSrc), fetchPriority, fetchPriority === 'high' ? 4 : 2);
+    if (fetchPriority === 'high') {
+      preloadImages(sources.slice(0, 2), 'low', 2);
+    }
   }, []);
 
   const handleHeroVideoProgress = useCallback((percent) => {
@@ -1143,7 +1234,7 @@ export default function App() {
     if (!heroVideoReady) return undefined;
 
     let cancelled = false;
-    const firstImages = projects.map((project) => getProjectImageSources(project)[0]);
+    const firstImages = projects.map((project) => getThumbnailSrc(getProjectImageSources(project)[0]));
     const run = async () => {
       await preloadImages(firstImages, 'high', 4);
     };
