@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 
 import BlurText from './components/BlurText';
 import BorderGlow from './components/BorderGlow';
 import FlowingMenu from './components/FlowingMenu';
-import ProfileCard from './components/ProfileCard';
 import SpotlightCard from './components/SpotlightCard';
-import SplashCursor from './components/SplashCursor';
+
+const ProfileCard = lazy(() => import('./components/ProfileCard'));
+const SplashCursor = lazy(() => import('./components/SplashCursor'));
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
 const HERO_VIDEO_MP4_SRC = asset('assets/hero-video.mp4');
@@ -253,6 +254,25 @@ async function preloadImages(sources, fetchPriority = 'low', batchSize = 2) {
   }
 }
 
+function shouldUseHeavyEffects() {
+  if (typeof window === 'undefined') return false;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches;
+  const narrowScreen = window.matchMedia?.('(max-width: 900px)').matches;
+  const saveData = navigator.connection?.saveData;
+  const memory = navigator.deviceMemory || 8;
+  const cores = navigator.hardwareConcurrency || 8;
+
+  return !reducedMotion && !coarsePointer && !narrowScreen && !saveData && memory >= 6 && cores >= 6;
+}
+
+function shouldAutoStartAudio() {
+  if (typeof window === 'undefined') return false;
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches;
+  const saveData = navigator.connection?.saveData;
+  return !coarsePointer && !saveData;
+}
+
 function Header({ activeSection, onNavigate }) {
   return (
     <header className="site-header">
@@ -278,6 +298,14 @@ function Header({ activeSection, onNavigate }) {
         </a>
       </div>
     </header>
+  );
+}
+
+function ProfileCardFallback() {
+  return (
+    <div className="profile-card-fallback" aria-hidden="true">
+      <img src={asset('assets/个人ip.jpg')} alt="" loading="lazy" decoding="async" />
+    </div>
   );
 }
 
@@ -552,7 +580,15 @@ function MediaLightbox({ media, onClose }) {
             {current.type === 'photos' ? (
               <div className="video-lightbox-photos">
                 {current.images.map((src, i) => (
-                  <img key={src} src={src} alt={`照片 ${i + 1}`} className="video-lightbox-photo" />
+                  <img
+                    key={src}
+                    src={src}
+                    alt={`照片 ${i + 1}`}
+                    className="video-lightbox-photo"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={i === 0 ? 'high' : 'low'}
+                    decoding="async"
+                  />
                 ))}
               </div>
             ) : (
@@ -563,6 +599,7 @@ function MediaLightbox({ media, onClose }) {
                 controls
                 autoPlay
                 playsInline
+                preload="metadata"
               />
             )}
           </div>
@@ -601,9 +638,9 @@ function MediaLightbox({ media, onClose }) {
       <div className="media-lightbox__panel">
         <div className="media-lightbox__stage">
           {isVideo ? (
-            <video className="media-lightbox__media" src={media.mediaSrc} poster={media.poster} controls playsInline />
+            <video className="media-lightbox__media" src={media.mediaSrc} poster={media.poster} controls playsInline preload="metadata" />
           ) : (
-            <img className="media-lightbox__media" src={media.mediaSrc} alt={media.title || '作品预览'} />
+            <img className="media-lightbox__media" src={media.mediaSrc} alt={media.title || '作品预览'} loading="eager" fetchPriority="high" decoding="async" />
           )}
         </div>
         <button className="media-lightbox__close" type="button" aria-label="关闭预览" onClick={onClose}>
@@ -638,23 +675,25 @@ function Experience() {
               className="profile-spotlight"
               spotlightColor="rgba(184, 255, 32, 0.12)"
             >
-              <ProfileCard
-                className="profile-card-static"
-                name="杜鑫"
-                title="UI Designer"
-                handle="dx.design"
-                avatarUrl={asset('assets/个人ip.jpg')}
-                status="8 YEARS / SaaS / B端 / C端"
-                contactText="Contact"
-                showUserInfo
-                enableTilt={false}
-                enableMobileTilt={false}
-                onContactClick={handleProfileContact}
-                behindGlowEnabled={false}
-                behindGlowColor="rgba(184, 255, 32, 0.48)"
-                behindGlowSize="58%"
-                innerGradient="linear-gradient(145deg, rgba(12,18,18,0.96) 0%, rgba(42,68,48,0.86) 48%, rgba(184,255,32,0.28) 100%)"
-              />
+              <Suspense fallback={<ProfileCardFallback />}>
+                <ProfileCard
+                  className="profile-card-static"
+                  name="杜鑫"
+                  title="UI Designer"
+                  handle="dx.design"
+                  avatarUrl={asset('assets/个人ip.jpg')}
+                  status="8 YEARS / SaaS / B端 / C端"
+                  contactText="Contact"
+                  showUserInfo
+                  enableTilt={false}
+                  enableMobileTilt={false}
+                  onContactClick={handleProfileContact}
+                  behindGlowEnabled={false}
+                  behindGlowColor="rgba(184, 255, 32, 0.48)"
+                  behindGlowSize="58%"
+                  innerGradient="linear-gradient(145deg, rgba(12,18,18,0.96) 0%, rgba(42,68,48,0.86) 48%, rgba(184,255,32,0.28) 100%)"
+                />
+              </Suspense>
             </SpotlightCard>
           </motion.div>
           <motion.div
@@ -957,17 +996,19 @@ function MusicPlayer() {
       );
     };
 
-    audio.play().then(() => setPlaying(true)).catch(() => {
-      ['click', 'keydown', 'touchstart'].forEach(e =>
-        document.addEventListener(e, tryPlay, { once: true })
-      );
-    });
-
     const onPause = () => { audio.pause(); setPlaying(false); };
     const onResume = () => { audio.play().then(() => setPlaying(true)).catch(() => {}); };
 
     window.addEventListener('music-pause', onPause);
     window.addEventListener('music-resume', onResume);
+
+    if (shouldAutoStartAudio()) {
+      audio.play().then(() => setPlaying(true)).catch(() => {
+        ['click', 'keydown', 'touchstart'].forEach(e =>
+          document.addEventListener(e, tryPlay, { once: true })
+        );
+      });
+    }
 
     return () => {
       ['click', 'keydown', 'touchstart'].forEach(e =>
@@ -991,7 +1032,7 @@ function MusicPlayer() {
 
   return (
     <div className="music-player">
-      <audio ref={audioRef} src={asset('assets/music.m4a')} loop />
+      <audio ref={audioRef} src={asset('assets/music.m4a')} loop preload="none" />
       <button className="music-btn" onClick={toggle} aria-label={playing ? '暂停音乐' : '播放音乐'}>
         {playing ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -1017,6 +1058,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('');
   const [loadProgress, setLoadProgress] = useState(0);
   const [heroVideoReady, setHeroVideoReady] = useState(false);
+  const [enableHeavyEffects, setEnableHeavyEffects] = useState(false);
 
   const preloadProject = useCallback((project, fetchPriority = 'low') => {
     preloadImages(getProjectImageSources(project), fetchPriority, fetchPriority === 'high' ? 4 : 2);
@@ -1102,12 +1144,8 @@ export default function App() {
 
     let cancelled = false;
     const firstImages = projects.map((project) => getProjectImageSources(project)[0]);
-    const allImages = projects.flatMap(getProjectImageSources);
     const run = async () => {
       await preloadImages(firstImages, 'high', 4);
-      if (!cancelled) {
-        await preloadImages(allImages, 'low', 2);
-      }
     };
 
     const schedule = window.requestIdleCallback
@@ -1124,21 +1162,29 @@ export default function App() {
     };
   }, [heroVideoReady]);
 
+  useEffect(() => {
+    setEnableHeavyEffects(shouldUseHeavyEffects());
+  }, []);
+
   return (
     <main>
       <PagePreloader progress={loadProgress} isReady={heroVideoReady} />
       <MusicPlayer />
-      <SplashCursor
-        SIM_RESOLUTION={96}
-        DYE_RESOLUTION={720}
-        DENSITY_DISSIPATION={4.6}
-        VELOCITY_DISSIPATION={2.6}
-        SPLAT_RADIUS={0.16}
-        SPLAT_FORCE={4200}
-        COLOR_UPDATE_SPEED={4}
-        RAINBOW_MODE={false}
-        COLOR="#b8ff20"
-      />
+      {enableHeavyEffects && (
+        <Suspense fallback={null}>
+          <SplashCursor
+            SIM_RESOLUTION={72}
+            DYE_RESOLUTION={512}
+            DENSITY_DISSIPATION={4.8}
+            VELOCITY_DISSIPATION={2.8}
+            SPLAT_RADIUS={0.14}
+            SPLAT_FORCE={3400}
+            COLOR_UPDATE_SPEED={3}
+            RAINBOW_MODE={false}
+            COLOR="#b8ff20"
+          />
+        </Suspense>
+      )}
       <Header activeSection={activeSection} onNavigate={scrollToSection} />
       <Hero onHeroVideoProgress={handleHeroVideoProgress} onHeroVideoReady={handleHeroVideoReady} />
       <Experience />

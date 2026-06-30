@@ -728,6 +728,14 @@ video {
   padding: 78px 0 88px;
 }
 
+.experience,
+.projects,
+.strengths,
+.contact-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
+}
+
 .section::before {
   position: absolute;
   inset: 0;
@@ -819,6 +827,26 @@ video {
 
 .profile-card-frame .pc-card-wrapper {
   width: fit-content;
+}
+
+.profile-card-fallback {
+  display: grid;
+  width: 308px;
+  height: 350px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(184, 255, 32, 0.12);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 70% 24%, rgba(184, 255, 32, 0.22), transparent 38%),
+    linear-gradient(145deg, rgba(12,18,18,0.96), rgba(42,68,48,0.76));
+}
+
+.profile-card-fallback img {
+  width: 76%;
+  height: 76%;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 38px rgba(0, 0, 0, 0.35));
 }
 
 .profile-card-frame .pc-details {
@@ -1683,5 +1711,33 @@ video {
 
   .profile-card-frame .pc-card {
     height: min(390px, 72vh);
+  }
+
+  .strength-card:hover {
+    transform: none;
+  }
+
+  .strength-card:hover .tag-stack span {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .blur-text-segment {
+    filter: none !important;
+    transform: none !important;
   }
 }
