@@ -479,7 +479,7 @@ function ProgressiveGalleryMedia({ src, alt, priority = false, onPreviewReady })
     <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
       <div className="progressive-gallery-media__loader" aria-hidden="true">
         <img src={asset('assets/logo-lime.svg')} alt="" />
-        <span className="progressive-gallery-media__loader-text">图片加载中<span /></span>
+        <span className="progressive-gallery-media__loader-text">LOADING<span /></span>
       </div>
       <img
         className="progressive-gallery-media__full"
