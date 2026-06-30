@@ -705,29 +705,50 @@ video {
   display: block;
   flex-shrink: 0;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.035);
+  min-height: min(46vh, 560px);
+  background:
+    radial-gradient(circle at 50% 44%, rgba(184, 255, 32, 0.1), transparent 24rem),
+    rgba(255, 255, 255, 0.035);
 }
 
-.progressive-gallery-media__preview,
 .progressive-gallery-media__full {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: auto;
+  opacity: 0;
+  transition: opacity 260ms ease;
 }
 
-.progressive-gallery-media__preview {
-  opacity: 1;
-  transition: opacity 240ms ease;
-}
-
-.progressive-gallery-media__full {
+.progressive-gallery-media__loader {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 240ms ease;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 16px;
+  color: var(--lime);
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 700;
+  transition: opacity 220ms ease, visibility 220ms ease;
 }
 
-.progressive-gallery-media.is-loaded .progressive-gallery-media__preview {
+.progressive-gallery-media__loader img {
+  width: min(150px, 36vw);
+  height: auto;
+  filter: drop-shadow(0 0 24px rgba(184, 255, 32, 0.38));
+  animation: gallery-logo-pulse 1.45s ease-in-out infinite;
+}
+
+.progressive-gallery-media.is-loaded {
+  min-height: 0;
+}
+
+.progressive-gallery-media.is-loaded .progressive-gallery-media__loader {
+  visibility: hidden;
   opacity: 0;
 }
 
@@ -735,16 +756,24 @@ video {
   opacity: 1;
 }
 
-.media-lightbox__gallery-scroll > .progressive-gallery-media:first-child:not(.is-loaded) {
-  min-height: min(62vh, 720px);
+@keyframes gallery-logo-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .video-lightbox-photos .progressive-gallery-media {
   aspect-ratio: 1;
+  min-height: 0;
   border-radius: 10px;
 }
 
-.video-lightbox-photos .progressive-gallery-media__preview,
 .video-lightbox-photos .progressive-gallery-media__full {
   height: 100%;
   object-fit: cover;

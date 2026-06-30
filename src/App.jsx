@@ -13,19 +13,6 @@ const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
 const HERO_VIDEO_MP4_SRC = asset('assets/hero-video.mp4');
 const HERO_VIDEO_WEBM_SRC = asset('assets/hero-video.webm');
 
-const replaceExtension = (path, extension) => path.replace(/\.[^/.?#]+(?=([?#].*)?$)/, extension);
-
-function getAssetRelativePath(src) {
-  const marker = 'assets/';
-  const index = src.indexOf(marker);
-  return index >= 0 ? src.slice(index + marker.length) : '';
-}
-
-function getThumbnailSrc(src) {
-  const relativePath = getAssetRelativePath(src);
-  return relativePath ? asset(`assets/thumbs/${replaceExtension(relativePath, '.jpg')}`) : src;
-}
-
 const navItems = [
   { label: '工作经历', href: '#experience' },
   { label: '精选作品', href: '#projects' },
@@ -482,24 +469,18 @@ function PagePreloader({ progress, isReady }) {
 
 function ProgressiveGalleryMedia({ src, alt, priority = false, onPreviewReady }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const thumbnailSrc = getThumbnailSrc(src);
 
-  const handlePreviewReady = () => {
+  const handleFullImageSettled = () => {
+    setIsLoaded(true);
     onPreviewReady?.();
   };
 
   return (
     <div className={`progressive-gallery-media${isLoaded ? ' is-loaded' : ''}`}>
-      <img
-        className="progressive-gallery-media__preview"
-        src={thumbnailSrc}
-        alt=""
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'low'}
-        decoding="async"
-        onLoad={handlePreviewReady}
-        onError={handlePreviewReady}
-      />
+      <div className="progressive-gallery-media__loader" aria-hidden="true">
+        <img src={asset('assets/logo-lime.svg')} alt="" />
+        <span>LOADING</span>
+      </div>
       <img
         className="progressive-gallery-media__full"
         src={src}
@@ -507,7 +488,8 @@ function ProgressiveGalleryMedia({ src, alt, priority = false, onPreviewReady })
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : 'low'}
         decoding={priority ? 'sync' : 'async'}
-        onLoad={() => setIsLoaded(true)}
+        onLoad={handleFullImageSettled}
+        onError={handleFullImageSettled}
       />
     </div>
   );
