@@ -50,8 +50,8 @@ const consumerGallery = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
   asset(`assets/C端作品/${n}.${n <= 4 || n === 9 ? 'png' : 'gif'}`)
 );
 
-const businessGallery = ['整理01','整理02','整理03','整理04','整理05','整理06'].map((n) =>
-  asset(`assets/B端作品/${n}.png`)
+const businessGallery = ['整理01.jpg','整理02.png','整理03.png','整理04.png','整理05.png','整理06.png'].map((name) =>
+  asset(`assets/B端作品/${name}`)
 );
 
 const operationGallery = ['Slice 1','Slice 2','Slice 3','Slice 4','Slice 5'].map((n) =>
